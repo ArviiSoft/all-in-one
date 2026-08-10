@@ -1,4 +1,4 @@
-# V0.0.8 YAYIMLANDI!
+# V0.0.8 YAYIMLANDI
 - https://arvis-3.gitbook.io/all-in-one_v0.0.8
 
 # DISCORD
