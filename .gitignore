@@ -1,0 +1,16 @@
+node_modules/
+
+Settings/pid.txt
+Settings/pid.txt.starting
+Settings/.env
+Settings/.env.tmp-*
+
+Database/**/*.bak
+Database/**/*.lock
+Database/**/*.tmp-*
+Database/**/*.corrupt-*
+Database/Database State/database-state.json
+Database/MongoDB/mongodb-pending/
+Database/MongoDB/Database Backups/*
+!Database/MongoDB/Database Backups/.gitkeep
+Database/Sistem/dashboardProfiles.json
