@@ -58,7 +58,7 @@
     "rss-parser": "^3.13.0",
     "sodium-native": "^5.1.0",
     "string-width": "^4.2.3",
-    "uuid": "^11.1.0",
+    "uuid": "^14.0.2",
     "xml2js": "^0.6.2",
     "yaml": "^2.9.1",
     "youtube-ext": "^1.1.25",
