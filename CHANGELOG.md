@@ -100,7 +100,7 @@ Kullanılan kategori başlıkları:
 
 ---
 
-## [v1.9.4-beta.10] - 21.06.2026
+## [v1.9.10] - 21.06.2026
 
 ### Added
 
@@ -116,4 +116,4 @@ Kullanılan kategori başlıkları:
 [v1.9.4-beta.7]: https://github.com/ArviiSoft/all-in-one_test/releases/tag/V1.9.4-beta.7
 [v1.9.4-beta.8]: https://github.com/ArviiSoft/all-in-one_test/releases/tag/V1.9.4-beta.8
 [v1.9.4-beta.9]: https://github.com/ArviiSoft/all-in-one_test/releases/tag/V1.9.4-beta.9
-[v1.9.4-beta.10]: https://github.com/ArviiSoft/all-in-one_test/releases/tag/V1.9.4-beta.9
+[v1.9.10]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.10

@@ -51,7 +51,7 @@ client.on('messageCreate', async (message) => {
 
     if (!ayar || !ayar.status || ayar.channelId !== message.channel.id) return;
     /* 
-       RASTGELE TETİKLEME MANTIĞI - ArviS
+       RASTGELE TETİKLEME MANTIĞI - Arv1S
        Math.random() 0 ve 1 arasında değer döner,
        0.05 değeri %5 ihtimal demektir (ortalama 20 mesajda bir)
 
