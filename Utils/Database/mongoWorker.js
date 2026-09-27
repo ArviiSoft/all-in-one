@@ -221,6 +221,8 @@ function hasDatabaseInUri(url) {
   return pathIndex >= 0 && afterScheme.slice(pathIndex + 1).split("?")[0].length > 0;
 }
 
+const ALLOWED_OPERATIONS = new Set(["connect", "close", "read", "list", "write", "remove", "replaceAll"]);
+
 if (!isMainThread) {
   const runtime = createMongoRuntime(workerData);
   let queue = Promise.resolve();
@@ -228,6 +230,9 @@ if (!isMainThread) {
     queue = queue.then(async () => {
       let response;
       try {
+        if (!ALLOWED_OPERATIONS.has(request.operation)) {
+          throw failure("MONGODB_OPERATION", "Desteklenmeyen MongoDB işlemi.");
+        }
         response = { id: request.id, ok: true, value: await runtime.execute(request.operation, request.args, request.deadline) };
       } catch (error) {
         response = { id: request.id, ok: false, error: sanitizeError(error) };
