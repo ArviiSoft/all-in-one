@@ -4,6 +4,7 @@ const {  Events, ContainerBuilder, SectionBuilder, ThumbnailBuilder, TextDisplay
 const fs = require('../../Utils/Core/databaseFs');
 const path = require('path');
 const emojiler = require('../../Utils/Emojis/emojiler.js');
+const { getDisplayedClanTag, getClanRoleId } = require('../../Utils/Membership/clanTag');
 
 const DB_PATH = path.join(__dirname, '../../Database/Sunucu Yönetimi/clanTag.json');
 
@@ -17,27 +18,25 @@ function readDB() {
     }
 }
 
-function normalizeTag(value) {
-    if (!value) return '';
-    return value
-        .normalize('NFC')
-        .replace(/[\uFF01-\uFF5E]/g, character => String.fromCharCode(character.charCodeAt(0) - 0xFEE0))
-        .trim()
-        .toUpperCase();
-}
-
-function getDisplayedClanTag(user) {
-    const clan = user?.primaryGuild;
-    if (!clan || clan.identityEnabled === false) return '';
-    return normalizeTag(clan.tag);
-}
-
 function getClanBadgeURL(user) {
     const clan = user?.primaryGuild;
-    if (!clan || clan.identityEnabled === false || !clan.identityGuildId || !clan.badge) return null;
+    if (!getDisplayedClanTag(user) || !clan.identityGuildId || !clan.badge) return null;
 
     return user.guildTagBadgeURL?.({ size: 128 })
         || `https://cdn.discordapp.com/guild-tag-badges/${clan.identityGuildId}/${clan.badge}.webp?size=128`;
+}
+
+function sameClanIdentity(oldUser, newUser) {
+    return getDisplayedClanTag(oldUser) === getDisplayedClanTag(newUser)
+        && oldUser?.primaryGuild?.identityGuildId === newUser?.primaryGuild?.identityGuildId
+        && oldUser?.primaryGuild?.identityEnabled === newUser?.primaryGuild?.identityEnabled;
+}
+
+function snapshotUser(user) {
+    return {
+        id: user.id, tag: user.tag, bot: user.bot,
+        primaryGuild: user.primaryGuild ? { ...user.primaryGuild } : null,
+    };
 }
 
 async function sendLog(guild, logChannelId, oldUser, newUser, operation, roleId) {
@@ -46,18 +45,20 @@ async function sendLog(guild, logChannelId, oldUser, newUser, operation, roleId)
 
     const oldTag = getDisplayedClanTag(oldUser) || 'Yok';
     const newTag = getDisplayedClanTag(newUser) || 'Yok';
+    const oldGuildId = getDisplayedClanTag(oldUser) ? oldUser.primaryGuild?.identityGuildId || 'Bilinmiyor' : 'Yok';
+    const newGuildId = getDisplayedClanTag(newUser) ? newUser.primaryGuild?.identityGuildId || 'Bilinmiyor' : 'Yok';
     const useOldBadge = operation === 'alindi' || !getDisplayedClanTag(newUser);
     const badgeUser = useOldBadge ? oldUser : newUser;
     let badgeURL = getClanBadgeURL(badgeUser);
 
     if (!badgeURL && !useOldBadge) {
         const freshUser = await guild.client.users.fetch(newUser.id, { force: true }).catch(() => null);
-        if (freshUser) {
+        if (freshUser && sameClanIdentity(badgeUser, freshUser)) {
             badgeURL = getClanBadgeURL(freshUser);
         }
     }
 
-    if (!badgeURL) badgeURL = getClanBadgeURL(useOldBadge ? newUser : oldUser);
+    if (!badgeURL && sameClanIdentity(oldUser, newUser)) badgeURL = getClanBadgeURL(useOldBadge ? newUser : oldUser);
     let color;
     let title;
     let description;
@@ -65,15 +66,15 @@ async function sendLog(guild, logChannelId, oldUser, newUser, operation, roleId)
     if (operation === 'verildi') {
         color = 0x57F287;
         title = `${emojiler.tik} Clan Tag Rolü Verildi`;
-        description = `${emojiler.uye} **Kişi:** <@${newUser.id}> (${newUser.id})\n${emojiler.hashtag} **Tag:** \`${newTag}\`\n${emojiler.ampul} **Rol:** <@&${roleId}>`;
+        description = `${emojiler.uye} **Kişi:** <@${newUser.id}> (${newUser.id})\n${emojiler.hashtag} **Tag:** \`${newTag}\`\n${emojiler.home} **Tag Sunucu ID:** \`${newGuildId}\`\n${emojiler.ampul} **Rol:** <@&${roleId}>`;
     } else if (operation === 'alindi') {
         color = 0xED4245;
         title = `${emojiler.carpi} Clan Tag Rolü Alındı`;
-        description = `${emojiler.uye} **Kişi:** <@${newUser.id}> (${newUser.id})\n${emojiler.hashtag} **Eski Tag:** \`${oldTag}\`\n${emojiler.ampul} **Rol:** <@&${roleId}>`;
+        description = `${emojiler.uye} **Kişi:** <@${newUser.id}> (${newUser.id})\n${emojiler.hashtag} **Eski Tag:** \`${oldTag}\`\n${emojiler.hashtag} **Eski Tag Sunucu ID:** \`${oldGuildId}\`\n${emojiler.ampul} **Rol:** <@&${roleId}>`;
     } else {
         color = 0xFEE75C;
         title = '♻️ Clan Tag Değişti';
-        description = `${emojiler.uye} **Kişi:** <@${newUser.id}> (${newUser.id})\n${emojiler.hashtag} **Eski Tag:** \`${oldTag}\`\n${emojiler.hashtag} **Yeni Tag:** \`${newTag}\``;
+        description = `${emojiler.uye} **Kişi:** <@${newUser.id}> (${newUser.id})\n${emojiler.hashtag} **Eski Tag:** \`${oldTag}\`\n${emojiler.home} **Eski Tag Sunucu ID:** \`${oldGuildId}\`\n${emojiler.hashtag} **Yeni Tag:** \`${newTag}\`\n${emojiler.home} **Yeni Tag Sunucu ID:** \`${newGuildId}\``;
     }
 
     const container = new ContainerBuilder().setAccentColor(color);
@@ -110,24 +111,30 @@ async function sendLog(guild, logChannelId, oldUser, newUser, operation, roleId)
     });
 }
 
-async function synchronizeMember(member, tags) {
-    const currentTag = getDisplayedClanTag(member.user);
-    const wantedRoleId = tags[currentTag];
+async function synchronizeMember(member, tags, user = member.user) {
+    const currentTag = getDisplayedClanTag(user);
+    const wantedRoleId = getClanRoleId(user, member.guild.id, tags);
     const configuredRoleIds = new Set(Object.values(tags));
+    const changes = [];
 
     for (const roleId of configuredRoleIds) {
         if (roleId !== wantedRoleId && member.roles.cache.has(roleId)) {
-            await member.roles.remove(roleId, 'Clan tag-rol eşleşmesi').catch(error => {
+            await member.roles.remove(roleId, 'Clan tag-rol eşleşmesi: tag veya kaynak sunucu uygun değil').then(() => {
+                changes.push({ operation: 'alindi', roleId });
+            }).catch(error => {
                 console.error(`🔴 [CLAN] ${member.user.tag} kullanıcısından ${roleId} rolü alınamadı:`, error);
             });
         }
     }
 
     if (wantedRoleId && !member.roles.cache.has(wantedRoleId)) {
-        await member.roles.add(wantedRoleId, `Clan tag: ${currentTag}`).catch(error => {
+        await member.roles.add(wantedRoleId, `Clan tag: ${currentTag} | Sunucu: ${member.guild.id}`).then(() => {
+            changes.push({ operation: 'verildi', roleId: wantedRoleId });
+        }).catch(error => {
             console.error(`🔴 [CLAN] ${member.user.tag} kullanıcısına ${wantedRoleId} rolü verilemedi:`, error);
         });
     }
+    return changes;
 }
 
 async function synchronizeClanRoles(client) {
@@ -155,9 +162,11 @@ module.exports = {
     synchronizeClanRoles,
 
     async execute(oldUser, newUser, client) {
+        if (newUser.bot || sameClanIdentity(oldUser, newUser)) return;
+        oldUser = snapshotUser(oldUser);
+        newUser = snapshotUser(newUser);
         const oldTag = getDisplayedClanTag(oldUser);
         const newTag = getDisplayedClanTag(newUser);
-        if (oldTag === newTag) return;
 
         const db = readDB();
         for (const [guildId, settings] of Object.entries(db)) {
@@ -168,29 +177,10 @@ module.exports = {
             if (!member) continue;
 
             const tags = settings.tags || {};
-            const oldRoleId = tags[oldTag];
-            const newRoleId = tags[newTag];
-
-            if (oldRoleId && oldRoleId !== newRoleId && member.roles.cache.has(oldRoleId)) {
-                const removed = await member.roles.remove(oldRoleId, `Clan tag kaldırıldı: ${oldTag}`).then(() => true).catch(error => {
-                    console.error(`🔴 [CLAN] ${newUser.tag} kullanıcısından rol alınamadı:`, error);
-                    return false;
-                });
-                if (removed) {
-                    console.log(`🛡️ [CLAN] ${newUser.tag} ➜ \`${oldTag}\` rolü alındı.`);
-                    if (settings.logChannel) await sendLog(guild, settings.logChannel, oldUser, newUser, 'alindi', oldRoleId);
-                }
-            }
-
-            if (newRoleId && !member.roles.cache.has(newRoleId)) {
-                const added = await member.roles.add(newRoleId, `Clan tag alındı: ${newTag}`).then(() => true).catch(error => {
-                    console.error(`🔴 [CLAN] ${newUser.tag} kullanıcısına rol verilemedi:`, error);
-                    return false;
-                });
-                if (added) {
-                    console.log(`🛡️ [CLAN] ${newUser.tag} ➜ \`${newTag}\` rolü verildi.`);
-                    if (settings.logChannel) await sendLog(guild, settings.logChannel, oldUser, newUser, 'verildi', newRoleId);
-                }
+            const changes = await synchronizeMember(member, tags, newUser);
+            for (const { operation, roleId } of changes) {
+                console.log(`🛡️ [CLAN] ${newUser.tag} ➜ \`${operation === 'alindi' ? oldTag : newTag}\` rolü ${operation === 'alindi' ? 'alındı' : 'verildi'}.`);
+                if (settings.logChannel) await sendLog(guild, settings.logChannel, oldUser, newUser, operation, roleId);
             }
 
             if (settings.generalLogChannel) {

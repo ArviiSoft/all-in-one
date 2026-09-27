@@ -2,6 +2,7 @@
 
 const { PermissionFlagsBits: P } = require('discord.js');
 const { AyarHatasi } = require('./validation');
+const { getClanRoleId } = require('../Utils/Membership/clanTag');
 
 const BOT_OWNER_MODULES = new Set(['yedek-plani', 'temp-voice', 'ses-kanali', 'bot-log', 'yardim', 'genel', 'aktif-uye']);
 const MODULE_PERMISSIONS = {
@@ -13,7 +14,7 @@ const MODULE_PERMISSIONS = {
   'clan-tag': [P.ManageRoles], 'emoji-rol': [P.ManageRoles],
   'durum-rol': [P.ManageRoles], abonelik: [P.ManageRoles],
   'yetkili-basvuru': [P.ManageRoles], 'dogum-gunu': [P.ManageRoles],
-  'ses-panelleri': [P.ManageChannels], destek: [P.ManageChannels, P.ManageRoles],
+  'ses-panelleri': [P.ManageChannels], destek: [P.ManageChannels, P.ManageRoles], modmail: [P.Administrator],
   'emoji-ekle': [P.ManageGuildExpressions], honeypot: [P.KickMembers],
   audit: [P.ViewAuditLog], youtube: [P.ManageWebhooks], yedek: [P.Administrator],
 };
@@ -117,8 +118,8 @@ function assertTargetHierarchy(guild, member, target) {
 async function assertBulkHierarchy(moduleId, guild, member, input, savedValues) {
   if (isOwner(guild, member)) return;
   if (moduleId === 'clan-tag' && !Array.isArray(savedValues.tags)) throw new AyarHatasi('Toplu rol işlemi için kayıtlı roller doğrulanamadı.', 403);
-  const tags = new Map((savedValues.tags || []).map(row => [row.tag, row.roleId]));
-  const roleIds = new Set(tags.values());
+  const tags = Object.fromEntries((savedValues.tags || []).map(row => [row.tag, row.roleId]));
+  const roleIds = new Set(Object.values(tags));
   if (moduleId === 'clan-tag' && !roleIds.size) return;
   const members = await guild.members.fetch();
   for (const target of members.values()) {
@@ -127,11 +128,7 @@ async function assertBulkHierarchy(moduleId, guild, member, input, savedValues) 
       if ([guild.ownerId, guild.members.me?.id].includes(target.id) || !target.manageable || target.roles.cache.has(input.roleId) === (input.operation === 'add')) continue;
     } else {
       if (target.user.bot) continue;
-      const primary = target.user.primaryGuild;
-      const tag = primary?.identityEnabled !== false && primary?.tag
-        ? primary.tag.normalize('NFC').replace(/[\uFF01-\uFF5E]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0)).trim().toUpperCase()
-        : null;
-      const desired = tags.get(tag);
+      const desired = getClanRoleId(target.user, guild.id, tags);
       const removing = [...roleIds].some(id => id !== desired && target.roles.cache.has(id));
       const adding = desired && !target.roles.cache.has(desired);
       if (!removing && !adding) continue;

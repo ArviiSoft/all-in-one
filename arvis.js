@@ -15,10 +15,11 @@ try {
 }
 process.prependOnceListener("exit", () => { try { closeDatabase(); } catch {} });
 
-const { Client, GatewayIntentBits, Partials, Collection } = require("discord.js");
+const { Collection } = require("discord.js");
+const { createDiscordClient } = require("./Utils/Core/discordClient");
 const { setupBlacklistServers } = require("./Utils/Moderation/blacklistservers");
 const DISCORD_TOKEN = getRequiredEnv("DISCORD_TOKEN");
-const client = global.client = new Client({intents: Object.keys(GatewayIntentBits),partials:Object.keys(Partials)});
+const client = global.client = createDiscordClient();
 require('./Utils/Core/clientErrors').installClientErrorHandler(client);
 
 const { Player } = require('discord-player');

@@ -4,6 +4,7 @@ const { SlashCommandBuilder, PermissionFlagsBits, ChannelType, ActionRowBuilder,
 const fs = require('../../Utils/Core/databaseFs');
 const path = require('path');
 const emojiler = require('../../Utils/Emojis/emojiler.js');
+const { normalizeTag } = require('../../Utils/Membership/clanTag');
 
 const DB_PATH = path.join(__dirname, '../../Database/Sunucu Yönetimi/clanTag.json');
 const PANEL_ACCENT_COLOR = 0xc9a76a;
@@ -100,7 +101,7 @@ function panelPayload(guildId, sessionId, disabled = false, ephemeral = true) {
         .setAccentColor(PANEL_ACCENT_COLOR)
         .addTextDisplayComponents(
             new TextDisplayBuilder().setContent(
-                '## Clan Tag-Rol Ayarları \nDüzenlemek istediğiniz ayarın yanındaki **Değiştir** butonuna tıklayın.'
+                `## Clan Tag-Rol Ayarları \nDüzenlemek istediğiniz ayarın yanındaki **Değiştir** butonuna tıklayın.\nRol yalnızca **bu sunucunun** görünen clan tagını taşıyan üyelere verilir. Kaynak sunucu ID’si otomatik doğrulanır: ${safeCode(guildId)}. Aynı adlı başka sunucu tagları geçersizdir.`
             )
         )
         .addSectionComponents(
@@ -190,7 +191,7 @@ function mappingsPrompt(config, sessionId) {
     );
     return promptPayload(
         'Tag-Rol Eşleşmelerini Yönet',
-        'Ekleme veya güncelleme için önce bir **rol seçin**, ardından açılan forma clan tagını yazın. Silmek için alttaki listeden bir eşleşme seçin.',
+        'Ekleme veya güncelleme için önce bir **rol seçin**, ardından açılan forma bu sunucunun clan tagını yazın. Kaynak sunucu ID’si otomatik kontrol edilir. Silmek için alttaki listeden bir eşleşme seçin.',
         rows
     );
 }
@@ -330,7 +331,7 @@ module.exports = {
                 if (componentInteraction.isModalSubmit() && action.startsWith('tag:')) {
                     await componentInteraction.deferReply({ flags: MessageFlags.Ephemeral });
                     const roleId = action.slice('tag:'.length);
-                    const tag = componentInteraction.fields.getTextInputValue('tag').trim().toUpperCase();
+                    const tag = normalizeTag(componentInteraction.fields.getTextInputValue('tag'));
                     if (!tag) return componentInteraction.editReply(noticePayload('Geçersiz tag', `${emojiler.uyari} Clan tag boş olamaz.`, true, false));
 
                     updateGuildConfig(guildId, config => { config.tags[tag] = roleId; });
@@ -340,7 +341,7 @@ module.exports = {
 
                 if (componentInteraction.isModalSubmit() && action === 'removeTag') {
                     await componentInteraction.deferReply({ flags: MessageFlags.Ephemeral });
-                    const tag = componentInteraction.fields.getTextInputValue('tag').trim().toUpperCase();
+                    const tag = normalizeTag(componentInteraction.fields.getTextInputValue('tag'));
                     const config = guildConfig(guildId);
                     const roleId = config.tags[tag];
                     if (!roleId) {

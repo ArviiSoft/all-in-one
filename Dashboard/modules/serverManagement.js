@@ -4,6 +4,7 @@ const path = require('path');
 const { PermissionFlagsBits: P, MessageFlags } = require('discord.js');
 const { createJsonStore } = require('../../Utils/Core/safeJsonStore');
 const { AyarHatasi } = require('../validation');
+const { normalizeTag, getClanRoleId } = require('../../Utils/Membership/clanTag');
 
 const storeFor = file => createJsonStore(path.join(__dirname, '../../Database', file));
 const clone = value => JSON.parse(JSON.stringify(value));
@@ -110,8 +111,7 @@ module.exports = function registerServerManagement(ctx) {
   }, { command: 'kanal-yönlendirme', pattern: 'B' });
 
   const clan = storeFor('Sunucu Yönetimi/clanTag.json');
-  const normalizeTag = value => value.normalize('NFC').replace(/[\uFF01-\uFF5E]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0)).trim().toUpperCase();
-  ekle('clan-tag', 'Clan tag → rol', 'Sunucu Yönetimi', 'Clan tag eşleşmelerini ve iki ayrı kayıt kanalını yönetin.', 'Database/Sunucu Yönetimi/clanTag.json', [
+  ekle('clan-tag', 'Clan tag → rol', 'Sunucu Yönetimi', 'Bu sunucunun clan tag eşleşmelerini ve iki ayrı kayıt kanalını yönetin. Tagın kaynak sunucu ID’si bu sunucuyla eşleşmelidir; aynı adlı başka sunucu tagları rol kazandırmaz.', 'Database/Sunucu Yönetimi/clanTag.json', [
     l('tags', 'Etiket ve rol eşleşmeleri', [t('tag', 'Clan tag', 32, { minLength: 1 }), r('roleId', 'Verilecek rol', false)], 500), c('logChannel', 'Rol değişikliği kayıt kanalı'), c('generalLogChannel', 'Genel etiket kayıt kanalı'),
   ], g => { const v = clan.get(g.id) || {}; return { ...v, tags: Object.entries(v.tags || {}).map(([tag, roleId]) => ({ tag, roleId })) }; }, (g, patch) => {
     const next = { ...patch };
@@ -123,7 +123,7 @@ module.exports = function registerServerManagement(ctx) {
       next.tags = Object.fromEntries(entries);
     }
     clan.update(data => { Object.assign(data[g.id] ||= {}, next); });
-  }, { command: 'clan-tag-rol', pattern: 'B', actions: [{ id: 'sync', label: 'Üye rollerini eşitle', description: 'Mevcut üyelerin görünen klan etiketlerine göre kayıtlı rolleri uygular.', fields: [], run: async g => {
+  }, { command: 'clan-tag-rol', pattern: 'B', actions: [{ id: 'sync', label: 'Üye rollerini eşitle', description: 'Bu sunucuya ait görünen taglara kayıtlı rolleri verir; eşleşmeyen üyelerden kayıtlı clan rollerini kaldırır.', fields: [], run: async g => {
     const tags = clan.get(g.id)?.tags || {};
     if (Object.keys(tags).length && !g.members.me.permissions.has(P.ManageRoles)) throw new AyarHatasi('Botun Rolleri Yönet izni gerekli.');
     for (const id of new Set(Object.values(tags))) {
@@ -134,8 +134,7 @@ module.exports = function registerServerManagement(ctx) {
     let changed = 0;
     for (const member of members.values()) {
       if (member.user.bot) continue;
-      const primary = member.user.primaryGuild;
-      const desired = primary?.identityEnabled !== false && primary?.tag ? tags[normalizeTag(primary.tag)] : null;
+      const desired = getClanRoleId(member.user, g.id, tags);
       for (const id of new Set(Object.values(tags))) {
         if (id !== desired && member.roles.cache.has(id)) { await member.roles.remove(id, 'Panel: Clan tag eşitleme'); changed++; }
       }

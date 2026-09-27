@@ -138,7 +138,7 @@ module.exports = {
         id: "destek-basvuru",
         label: "Destek & Başvuru",
         emoji: emojiler.fourdkalp,
-        commands: ["destek-sistemi", "yetkili-başvuru", "itiraf-sistemi"],
+        commands: ["destek-sistemi", "modmail", "yetkili-başvuru", "itiraf-sistemi"],
       },
       {
         id: "kayit-uye",

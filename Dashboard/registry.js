@@ -93,7 +93,7 @@ function createRegistry(client) {
   }, { command: 'yedek-sistemi', scope: 'global', pattern: 'YAML', note: 'Bu plan bot genelindedir; tüm sunucular için aynı ayardır. Mevcut zamanlayıcı yalnız Europe/Istanbul saat dilimini destekler. Değişiklik bir sonraki dakika kontrolünde okunur.' });
 
   const context = { client, ekle, b, n, t, c, r, e, s, a, l, birlestir, tekilKanallar };
-  for (const module of ['./modules/automod', './modules/moderation', './modules/serverManagement', './modules/community', './modules/engagement', './modules/system', './modules/backupGeneral']) require(module)(context);
+  for (const module of ['./modules/automod', './modules/moderation', './modules/serverManagement', './modules/modmail', './modules/community', './modules/engagement', './modules/system', './modules/backupGeneral']) require(module)(context);
   return liste;
 }
 module.exports = { createRegistry };

@@ -2,6 +2,7 @@ const { SlashCommandBuilder, PermissionFlagsBits, ChannelType, ActionRowBuilder,
 const fs = require('../../Utils/Core/databaseFs');
 const path = require('path');
 const emojiler = require('../../Utils/Emojis/emojiler.js');
+const { assertAnonymousAllowed } = require('../../Utils/ModMail/dmConflicts');
 
 const dbPath     = path.join(__dirname, '../../Database/Eğlence ve Etkileşim/anonimSohbet.json');
 const queuePath  = path.join(__dirname, '../../Database/Eğlence ve Etkileşim/anonimKuyruk.json');
@@ -212,6 +213,7 @@ async function deleteConfiguredPanel(guild, guildAyar = {}) {
 }
 
 async function createOrUpdatePanel(guild, kanal, eskiAyar = {}) {
+  assertAnonymousAllowed();
   const components = [buildPanelContainer(), buildStartButton()];
 
   if (eskiAyar.channelId === kanal.id) {
@@ -472,10 +474,11 @@ module.exports = {
 
     try {
       panelMesaji = await createOrUpdatePanel(interaction.guild, sohbetKanali, eskiAyar);
+      assertAnonymousAllowed();
     } catch (error) {
       console.error('🕵️ [ANONİM SOHBET] Panel gönderilemedi:', error);
       return interaction.editReply({
-        content: `${emojiler.uyari} **Anonim sohbet paneli gönderilemedi. Botun kanal izinlerini kontrol edin.**`,
+        content: error instanceof TypeError ? error.message : `${emojiler.uyari} **Anonim sohbet paneli gönderilemedi. Botun kanal izinlerini kontrol edin.**`,
       });
     }
 
@@ -549,6 +552,8 @@ client.on('interactionCreate', async (interaction) => {
   const id = interaction.customId;
 
   if (id === 'anon_start') {
+    try { assertAnonymousAllowed(); }
+    catch (error) { return interaction.reply({ content: error.message, flags: MessageFlags.Ephemeral }); }
     const configuration = loadDB(dbPath)[interaction.guildId];
     if (!configuration?.channelId || configuration.channelId !== interaction.channelId || configuration.messageId !== interaction.message.id) {
       return interaction.reply({ content: 'Bu sohbet paneli artık etkin değil.', flags: MessageFlags.Ephemeral });
@@ -928,6 +933,7 @@ await userB.send({
 client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
   if (message.channel.type !== ChannelType.DM) return;
+  if (require('../../Utils/ModMail/modmailStore').ownsDirectMessages()) return;
 
   const userId    = message.author.id;
   const partnerId = getPartnerIdOf(userId);

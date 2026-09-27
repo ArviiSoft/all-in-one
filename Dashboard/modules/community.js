@@ -194,6 +194,7 @@ function register(ctx) {
     if (value.channelId) {
       const target = await channel(g, value.channelId, [PermissionFlagsBits.ReadMessageHistory]);
       message = await require('../../Utils/Engagement/anonimPanel').publishAnonymousPanel(g, target, old);
+      require('../../Utils/ModMail/dmConflicts').assertAnonymousAllowed();
     }
     db.update(FILES.anon, g.id, draft => { Object.assign(draft, patch); if (message) draft.messageId = message.id; });
   }, { command: 'anonim-sohbet', note: 'Kaydettiğinizde sohbet başlatma paneli seçilen kanalda yayımlanır veya güncellenir.' });

@@ -6,6 +6,7 @@ function connectedActive(id, values) {
   switch (id) {
     case 'automod': return Object.values(v).some(rule => rule?.enabled === true);
     case 'starboard': return Boolean(v.enabled && v.channelId);
+    case 'modmail': return Boolean(v.enabled && v.categoryId && v.logChannelId && v.staffRoleId);
     case 'aktif-uye': return Boolean(v.channelId && v.roleId);
     case 'burc': return Boolean(v.kanal && v.gonderilecekBurclar?.length);
     case 'giris-cikis': return Boolean(v.aktif && (v.giris?.kanal || v.cikis?.kanal));

@@ -1,4 +1,4 @@
-const { ActivityType } = require('discord.js');
+const { startPresence } = require('../../Utils/ModMail/modmailPresence');
 const fs = require("../../Utils/Core/databaseFs");
 const path = require("path");
 const schedule = require('node-schedule');
@@ -13,30 +13,6 @@ const { startClockChannelUpdater } = require("../../Utils/Voice/sesPanelClock");
 
 const aylar = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-function getTotalMembers(client) {
-    let count = 0;
-    client.guilds.cache.forEach(guild => {
-        count += guild.memberCount;
-    });
-    return count;
-}
-
-function getOnlineCount(client) {
-    let count = 0;
-    client.guilds.cache.forEach(guild => {
-        guild.members.cache.forEach(member => {
-            if (
-                !member.user.bot &&
-                member.presence &&
-                ["online", "dnd", "idle"].includes(member.presence.status)
-            ) {
-                count++;
-            }
-        });
-    });
-    return count;
-}
-
 module.exports = {
     name: "clientReady",
     once: true,
@@ -63,17 +39,7 @@ module.exports = {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //BOT OYNUYOR
-        client.user.setPresence({
-            activities: [{ name: `${getOnlineCount(client)} Çevrimiçi ・ ${getTotalMembers(client)} Üye`, type: ActivityType.Custom }],
-            status: require('../../Utils/Core/generalSettings').settings.BotStatus || 'online'
-        });
-
-        setInterval(() => {
-            client.user.setPresence({
-                activities: [{ name: `${getOnlineCount(client)} Çevrimiçi ・ ${getTotalMembers(client)} Üye`, type: ActivityType.Custom }],
-                status: require('../../Utils/Core/generalSettings').settings.BotStatus || 'online'
-            });
-        }, 5 * 60 * 1000);
+        startPresence(client);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

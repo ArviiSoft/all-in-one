@@ -46,8 +46,8 @@ ALL In ONE, sunucu yönetimini Discord slash komutları ve tarayıcı üzerinden
 | Alan | Öne çıkan özellikler |
 | :--- | :--- |
 | **Güvenlik ve moderasyon** | Ban, kick, timeout, uyarılar, toplu rol işlemleri, kanal kilidi, mesaj temizleme, AutoMod, spam/raid korumaları, honeypot ve denetim kayıtları. |
-| **Sunucu otomasyonu** | Karşılama ve uğurlama, otomatik rol, emoji rol, clan tag rol, durum rolü, kanal yönlendirme, otomatik thread, otomatik yayınlama ve yapışkan mesajlar. |
-| **Topluluk ve üyelik** | Seviye ve XP, rol ödülleri, aktif üye seçimi, abonelik, yetkili başvuruları, destek talepleri, transkriptler, doğum günleri ve boost bildirimleri. |
+| **Sunucu otomasyonu** | Karşılama ve uğurlama, otomatik rol, emoji rol, sunucu kimliği doğrulamalı clan tag rol, durum rolü, kanal yönlendirme, otomatik thread, otomatik yayınlama ve yapışkan mesajlar. |
+| **Topluluk ve üyelik** | Seviye ve XP, rol ödülleri, aktif üye seçimi, abonelik, yetkili başvuruları, destek talepleri, DM üzerinden ModMail, transkriptler, doğum günleri ve boost bildirimleri. |
 | **Eğlence ve etkileşim** | Çekiliş, oylama, oyun kanalları, anonim sohbet, anı defteri, itiraf, zaman kapsülü, görsel kartlar ve rastgele iltifatlar. |
 | **Ses ve müzik** | Şarkı arama/oynatma, sıra yönetimi, Spotify ve YouTube Music entegrasyonları, geçici ses odaları, botun ses bağlantısı ve sunucu sayaçları. |
 | **Bildirimler ve zamanlama** | YouTube bildirimleri, haber/RSS akışı, zamanlanmış mesajlar, hatırlatıcılar ve günlük gönderimler. |
@@ -57,7 +57,7 @@ ALL In ONE, sunucu yönetimini Discord slash komutları ve tarayıcı üzerinden
 <details>
 <summary><strong>Komut kategorileri ve örnekler</strong></summary>
 
-Mevcut kaynak ağacında **9 kategoride 97 komut dosyası** bulunur. Gerçekte yüklenen ve Discord'a kaydedilen komutlar başlangıç ekranında raporlanır. Sunucu içindeki güncel liste için `/yardım` komutunu kullanın.
+Mevcut kaynak ağacında **9 kategoride 98 komut dosyası** bulunur. Gerçekte yüklenen ve Discord'a kaydedilen komutlar başlangıç ekranında raporlanır. Sunucu içindeki güncel liste için `/yardım` komutunu kullanın.
 
 | Kategori | Dosya sayısı | Örnek komutlar |
 | :--- | ---: | :--- |
@@ -68,13 +68,33 @@ Mevcut kaynak ağacında **9 kategoride 97 komut dosyası** bulunur. Gerçekte y
 | Kullanıcı | 17 | `/avatar`, `/seviye`, `/hatırlatıcı`, `/doğum-günü` |
 | Kurulumlu | 12 | `/emoji-rol`, `/clan-tag-rol`, `/otomatik-thread`, `/süreli-mesaj` |
 | Moderasyon | 17 | `/ban`, `/timeout`, `/automod`, `/honeypot` |
-| Sunucu | 16 | `/giriş-çıkış`, `/destek-sistemi`, `/starboard`, `/seviye-sistemi` |
+| Sunucu | 17 | `/giriş-çıkış`, `/destek-sistemi`, `/modmail`, `/starboard`, `/seviye-sistemi` |
 | Yedek | 2 | `/yedek-sistemi`, `/yedekten-kur` |
 
 </details>
 
 > [!TIP]
 > İlk kurulumdan sonra `/yardım` ile özellikleri keşfedin. Kurulum gerektiren sistemlerde önce kanal ve rol seçimlerini tamamlayın, ardından özelliği bir test kanalında deneyin.
+
+### Clan tag rol kurulumu ve kullanımı
+
+`/clan-tag-rol` panelinden veya Dashboard > Sunucu Yönetimi > Clan tag > rol üzerinden **bu sunucunun tagını**, verilecek rolü ve isteğe bağlı iki log kanalını ayarlayın. Botta **Rolleri Yönet** izni bulunmalı ve botun en yüksek rolü, verilecek rolün üstünde olmalıdır.
+
+Rol için hem kayıtlı tag yazısı eşleşmeli hem de Discord'un bildirdiği `primaryGuild.identityGuildId`, ayarın yapıldığı sunucunun ID'siyle aynı olmalıdır. Sunucu ID'si otomatik kontrol edilir, ayrıca girmeniz gerekmez. Tagın görünürlüğü (`identityEnabled`) açık olmalıdır. Aynı yazıya sahip başka bir sunucunun tagı, gizlenen tag veya eksik kimlik bilgisi rol kazandırmaz. Tag yazısı değişmeden başka sunucunun tagına geçildiğinde de rol geri alınır. Rol logları ve genel tag logları kaynak sunucu ID'sini gösterir.
+
+Mevcut tag-rol ayarları korunur. Güncellemeden sonra botu yeniden başlatın, açılış eşitlemesi kayıtlı clan rollerini bu kurala göre yeniden değerlendirir ve hatalı verilmiş olanları kaldırır. Dashboard'daki **Üye rollerini eşitle** işlemiyle de eşitlemeyi başlatabilirsiniz. Bu işlemler yalnızca sistemde kayıtlı clan rollerini yönetir.
+
+### ModMail kurulumu ve kullanımı
+
+`/modmail` yönetim panelinden veya Dashboard > Sunucu Yönetimi > ModMail üzerinden kategori, transcript log kanalı ve yetkili rolünü seçip sistemi açın. İki panel aynı ayarları kullanır. Kurulumdan önce botun DM mesajlarını kullanan Anonim Sohbet panelleri, bekleme kuyrukları ve açık sohbetleri kapatılmalıdır. Paneldeki **Anonim Sohbeti Kapat** işlemi yalnızca bulunduğunuz sunucuyu etkiler, diğer sunuculardaki çakışmaları ilgili yöneticiler kapatır. İtiraf ve kanal tabanlı destek sistemi birlikte çalışabilir.
+
+Üye ilk DM mesajını gönderdiğinde **Yetkili ekibine ulaşmak istiyor musun?** sorusu ve **Evet / Hayır** butonları gösterilir. Evet seçilmeden kanal açılmaz ve mesaj yetkililere iletilmez, Hayır bekleyen mesajı iptal eder. Onay 5 dakika geçerlidir. Onay beklerken gelen ek mesajlar iletilmez ve talep açıldıktan sonra yeniden gönderilmelidir. Birden fazla ortak sunucuda ModMail açıksa Evet sonrasında sunucu seçimi istenir. Onaydan sonra yalnızca botun, yetkili rolünün ve yöneticilerin görebildiği `modmail-kullanıcıadı` adlı kanal açılır. Talep sahibi DM’deki karşılama mesajının **ModMail'i Kapat** butonuyla kendi talebini kapatabilir; transcript kaydedilmeden kanal silinmez. Mevcut açık taleplerin ID içeren kanal adları ve eksik kapatma butonları bot açılışında güncellenir. Yetkilinin talep kanalına yazdığı metinler ve dosyalar üyeye iletilir; `//` ile başlayan iç notlar iletilmez ve transcript'e eklenmez. Talep üstlenilebilir ve kapatma nedeni girilerek kapatılabilir. Dashboard'dan da talepler listelenebilir, üstlenilebilir, yanıtlanabilir ve kapatılabilir; üstlenme ve yanıt gönderme için Discord hesabıyla giriş gerekir.
+
+Kapanışta ModMail’e özel HTML görüşme arşivi oluşturulur. Üye mesajları solda, yetkili yanıtları sağda görünür, her mesajda yazarın adı, kullanıcı kimliği, İstanbul saatine göre zamanı ve kaynağı (DM, yetkili kanalı veya Dashboard) bulunur. Yan bölümde yanıt veren yetkililer ve yanıt sayıları, talep sahibi, üstlenen kişi ve kapatma notu listelenir. Aynı kişi iki taraftan da yazsa mesajların üye/yetkili ayrımı korunur. Dosya, ayrıntılı **Components V2 ModMail log embedının içinde** gösterilir, ayrı bir HTTP sunucusu veya görüntüleme bağlantısı gerekmez. Transcript log kanalına yüklenmeden talep kanalı silinmez. Log yükleme ya da kanal silme hatasında panelden kapatma yeniden denenebilir. Üyenin DM'leri kapalıysa sunucudaki log korunur. Görüşmeler bot yeniden başlatıldığında devam eder.
+
+ModMail açıkken bot durumu 30 saniyede bir çevrimiçi/üye sayıları ile **Destek İçin DM At!** arasında döner. Son etkin ModMail sistemi kapatıldığında normal sayaç durumu geri gelir. Kapatma yeni talepleri durdurur; açık görüşmeler tamamlanabilir. Açık talepler bitmeden Anonim Sohbet yeniden açılamaz. Sunucu başına açık talep sınırı 1–50, görüşme başına sınır 2000 mesaj, dosya başına sınır 8 MB'dır. Büyük transcript'ler kartın içinde birden fazla dosyaya ayrılır.
+
+İzole ModMail testleri: `node tests/modmail.test.js`. Testler canlı Discord bağlantısı açmaz ve gerçek veritabanını değiştirmez.
 
 <a id="mimari"></a>
 

@@ -535,7 +535,7 @@ const modulIkon = modul => ({
   'alinti-rol': 'quote', 'yedek-plani': 'calendar', automod: 'shield', ban: 'ban', forceban: 'gavel', kick: 'personDown', 'nickname-degistir': 'userEdit',
   'rol-ver': 'userPlus', 'rol-al': 'userMinus', 'toplu-rol': 'users', timeout: 'hourglass', temizle: 'broom', yavasmod: 'turtle', 'kanal-kilitle': 'lock',
   nuke: 'bomb', uyari: 'warning', 'aktif-uye': 'chart', burc: 'zodiac', 'emoji-ekle': 'palette', sticky: 'pin', yonlendirme: 'route', 'clan-tag': 'hashTag',
-  'emoji-rol': 'reaction', destek: 'headset', 'ses-panelleri': 'sliders', honeypot: 'trap', audit: 'clipboard', boost: 'rocket', youtube: 'youtube', haber: 'rss',
+  'emoji-rol': 'reaction', destek: 'headset', modmail: 'headset', 'ses-panelleri': 'sliders', honeypot: 'trap', audit: 'clipboard', boost: 'rocket', youtube: 'youtube', haber: 'rss',
   'dogum-gunu': 'cake', 'eski-yeni': 'sort', anonim: 'incognito', ani: 'book', iltifat: 'sparkle', oyunlar: 'game', cekilis: 'gift', 'oy-yarismasi': 'trophy',
   'oylama-baslat': 'poll', 'zaman-kapsulu': 'capsule', 'random-medya': 'dice', 'temp-voice': 'mic', 'ses-kanali': 'speaker', 'bot-log': 'terminal',
   yardim: 'help', abonelik: 'card', 'yetkili-basvuru': 'fileCheck', yedek: 'archive', genel: 'settings',

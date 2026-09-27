@@ -182,6 +182,7 @@ client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
 
   const db = readAfkDB();
+  if (!message.guild && require('../../Utils/ModMail/modmailStore').ownsDirectMessages()) return;
   const afkData = db[message.author.id];
 
   if (afkData) {
@@ -291,6 +292,7 @@ async function processQueue() {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //BOT ETİKET CEVAP
 client.on("messageCreate", message => {
+  if (!message.guild && require('../../Utils/ModMail/modmailStore').ownsDirectMessages()) return;
   if (message.content === `<@${client.user.id}>`) {
     message.reply({ content: "Efendim?" })
   }
