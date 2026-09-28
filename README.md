@@ -7,7 +7,7 @@
 Moderasyon, otomasyon, topluluk araçları, müzik ve web yönetim paneli.<br>
 **arviis.** tarafından geliştirilen, kendi ortamınızda çalıştırabileceğiniz çok amaçlı Discord botu.
 
-![Sürüm](https://img.shields.io/badge/sürüm-1.9.10-8b5cf6?style=for-the-badge)
+![Sürüm](https://img.shields.io/badge/sürüm-1.9.11-8b5cf6?style=for-the-badge)
 ![Discord.js](https://img.shields.io/badge/discord.js-v14-5865F2?style=for-the-badge&logo=discord&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-22.13%2B_%2822.x%29-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
 ![Lisans](https://img.shields.io/badge/lisans-GPL--3.0--only-64748b?style=for-the-badge)
