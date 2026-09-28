@@ -2,7 +2,7 @@
 
 # ALL In ONE
 
-### Discord sunucunuz için tek merkezden yönetim
+### Discord sunucunuz için tek merkezden yönetim.
 
 Moderasyon, otomasyon, topluluk araçları, müzik ve web yönetim paneli.<br>
 **arviis.** tarafından geliştirilen, kendi ortamınızda çalıştırabileceğiniz çok amaçlı Discord botu.
