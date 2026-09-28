@@ -51,7 +51,7 @@
     "path": "^0.12.7",
     "play-dl": "^1.9.7",
     "pm2": "^7.0.4",
-    "puppeteer": "^24.31.0",
+    "puppeteer": "^25.12.0",
     "qrcode": "^1.5.4",
     "qrcode-reader": "^1.0.4",
     "request": "^2.88.2",
