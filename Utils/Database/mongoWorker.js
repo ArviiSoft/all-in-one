@@ -133,25 +133,26 @@ function createMongoRuntime({ url, dbName, timeoutMs = 30000 }, Driver) {
     }).sort({ path: 1 }).toArray();
   }
 
-  async function execute(operation, args, deadline) {
-    if (operation === "connect") return connect(deadline);
-    if (operation === "close") {
+  const CONNECTION_FREE_OPERATIONS = new Set(["connect", "close"]);
+
+  const OPERATIONS = {
+    async connect(args, deadline) {
+      return connect(deadline);
+    },
+    async close() {
       if (client) await client.close();
       client = null;
-      return;
-    }
-    if (!records || !metadata) throw failure("MONGODB_CLOSED", "MongoDB bağlantısı henüz açılmadı.");
-
-    if (operation === "read") {
+    },
+    async read(args, deadline) {
       validatePath(args.path);
       const generation = await activeGeneration(deadline);
       const result = await records.findOne({ generation, path: args.path }, options(deadline));
       return result ? result.content : null;
-    }
-    if (operation === "list") {
+    },
+    async list(args, deadline) {
       return listGeneration(await activeGeneration(deadline), deadline);
-    }
-    if (operation === "write") {
+    },
+    async write(args, deadline) {
       validateEntry(args);
       const generation = await activeGeneration(deadline);
       const now = new Date();
@@ -159,15 +160,13 @@ function createMongoRuntime({ url, dbName, timeoutMs = 30000 }, Driver) {
         $set: { content: args.content, updatedAt: now },
         $setOnInsert: { path: args.path, generation, createdAt: now },
       }, { ...options(deadline), upsert: true });
-      return;
-    }
-    if (operation === "remove") {
+    },
+    async remove(args, deadline) {
       validatePath(args.path);
       const generation = await activeGeneration(deadline);
       await records.deleteOne({ generation, path: args.path }, options(deadline));
-      return;
-    }
-    if (operation === "replaceAll") {
+    },
+    async replaceAll(args, deadline) {
       if (!Array.isArray(args.entries)) throw failure("MONGODB_SNAPSHOT", "MongoDB aktarımı bir kayıt listesi içermelidir.");
       const seen = new Set();
       for (const entry of args.entries) {
@@ -207,9 +206,17 @@ function createMongoRuntime({ url, dbName, timeoutMs = 30000 }, Driver) {
         await records.deleteMany({ generation: { $nin: [generation, previous] } }, options(cleanupDeadline));
       } catch {
       }
-      return;
+    },
+  };
+
+  async function execute(operation, args, deadline) {
+    if (typeof operation !== "string" || !Object.prototype.hasOwnProperty.call(OPERATIONS, operation)) {
+      throw failure("MONGODB_OPERATION", "Desteklenmeyen MongoDB işlemi.");
     }
-    throw failure("MONGODB_OPERATION", "Desteklenmeyen MongoDB işlemi.");
+    if (!CONNECTION_FREE_OPERATIONS.has(operation) && (!records || !metadata)) {
+      throw failure("MONGODB_CLOSED", "MongoDB bağlantısı henüz açılmadı.");
+    }
+    return OPERATIONS[operation](args, deadline);
   }
 
   return { execute };
@@ -221,8 +228,6 @@ function hasDatabaseInUri(url) {
   return pathIndex >= 0 && afterScheme.slice(pathIndex + 1).split("?")[0].length > 0;
 }
 
-const ALLOWED_OPERATIONS = new Set(["connect", "close", "read", "list", "write", "remove", "replaceAll"]);
-
 if (!isMainThread) {
   const runtime = createMongoRuntime(workerData);
   let queue = Promise.resolve();
@@ -230,9 +235,6 @@ if (!isMainThread) {
     queue = queue.then(async () => {
       let response;
       try {
-        if (!ALLOWED_OPERATIONS.has(request.operation)) {
-          throw failure("MONGODB_OPERATION", "Desteklenmeyen MongoDB işlemi.");
-        }
         response = { id: request.id, ok: true, value: await runtime.execute(request.operation, request.args, request.deadline) };
       } catch (error) {
         response = { id: request.id, ok: false, error: sanitizeError(error) };
