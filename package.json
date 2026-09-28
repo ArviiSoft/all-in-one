@@ -8,6 +8,7 @@
   "main": "arvis.js",
   "scripts": {
     "test": "node arvis.js",
+    "test:unit": "node --test Utils/Database/*.test.js",
     "arviis:dev": "nodemon arvis.js",
     "lint": "eslint . --config .github/eslint.config.mjs",
     "dashboard:password": "node Dashboard/scripts/password.js"
