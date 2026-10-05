@@ -15,7 +15,7 @@
   "dependencies": {
     "@discord-player/extractor": "^7.2.0",
     "@discordjs/voice": "^0.19.2",
-    "@napi-rs/canvas": "^1.0.9",
+    "@napi-rs/canvas": "^1.0.10",
     "@snazzah/davey": "^0.1.11",
     "apify-client": "^2.12.4",
     "archiver": "^8.0.0",
