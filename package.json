@@ -62,7 +62,7 @@
     "xml2js": "^0.6.2",
     "yaml": "^2.9.1",
     "youtube-ext": "^1.1.25",
-    "youtubei.js": "17.2.0"
+    "youtubei.js": "18.1.0"
   },
   "allowScripts": {
     "canvas@3.1.0": true,
