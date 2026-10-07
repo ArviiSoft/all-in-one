@@ -136,5 +136,12 @@ Kullanılan kategori başlıkları:
 
 ---
 
-[v1.9.10]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.10
-[v1.9.11]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.11
+## [v1.9.12] - 07.10.2026
+
+### Düzeltildi
+
+- Kullanıcının hem eski hem de yeni clan tagı boşken gereksiz "Clan Tag Değişti" logu gönderilmesi engellendi. Tag ekleme, kaldırma, gizleme ve kaynak sunucu değişikliklerinin takibi ile rol eşitlemesi korunuyor.
+
+---
+
+[v1.9.12]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.12

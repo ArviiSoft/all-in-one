@@ -183,7 +183,7 @@ module.exports = {
                 if (settings.logChannel) await sendLog(guild, settings.logChannel, oldUser, newUser, operation, roleId);
             }
 
-            if (settings.generalLogChannel) {
+            if (settings.generalLogChannel && (oldTag || newTag)) {
                 await sendLog(guild, settings.generalLogChannel, oldUser, newUser, 'degisti');
             }
         }
