@@ -144,4 +144,6 @@ Kullanılan kategori başlıkları:
 
 ---
 
+[v1.9.10]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.10
+[v1.9.11]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.11
 [v1.9.12]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.12
