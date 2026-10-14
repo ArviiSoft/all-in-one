@@ -32,7 +32,6 @@ Moderasyon, otomasyon, topluluk araçları, müzik ve web yönetim paneli.<br>
 - [JSON ve MongoDB](#veritabani)
 - [Yedekleme ve geri yükleme](#yedekleme)
 - [Çalıştırma ve işletim](#calistirma)
-- [Proje yapısı](#proje-yapisi)
 - [Geliştirme ve kontroller](#gelistirme)
 - [Sorun giderme](#sorun-giderme)
 - [Katkı, güvenlik ve lisans](#katki)
@@ -452,46 +451,7 @@ Hazır PM2 yapılandırması **tek süreç**, `fork` modu, otomatik yeniden baş
 > [!IMPORTANT]
 > Aynı proje klasörünü terminal, BAT ve PM2 ile eşzamanlı çalıştırmayın. `Settings/pid.txt` ve başlangıç kilidi ikinci süreci engeller. Kilit hatasında önce çalışan süreci kontrol edin, aktif sürecin kilidini silmeyin.
 
-Başlangıç panelleri olay/komut yükleme sonuçlarını ve etkinse Dashboard durumunu gösterir. Veritabanı veya etkin Dashboard'un yapılandırılması başarısız olursa açılış hata ile sonlanabilir, hata satırındaki eksik ayarı düzeltin.
-
-<a id="proje-yapisi"></a>
-
-## 🗂️ Proje yapısı
-
-```text
-.
-├── arvis.js                 # Ana giriş noktası ve servis başlatma
-├── Commands/                # Kategorilere ayrılmış slash komutları
-├── Events/                  # Discord mesaj, üye, etkileşim ve durum olayları
-├── Handlers/                # Komut/olay yükleyicileri ve entegrasyonlar
-├── Dashboard/
-│   ├── server.js            # HTTP sunucusu, oturum ve API yolları
-│   ├── authConfig.js        # Local/public mod yapılandırması
-│   ├── discordOAuth.js      # Discord giriş akışı
-│   ├── guildAccess.js       # Sunucu, modül ve işlem yetkileri
-│   ├── registry.js          # Panel modülleri ve ayar şemaları
-│   ├── modules/             # Modül tanımları ve yönetim işlemleri
-│   ├── stores/              # Panel veri erişimi
-│   ├── public/              # HTML, CSS, JavaScript ve fontlar
-│   ├── scripts/             # Parola üretme aracı
-│   └── tests/               # Panel ve tarayıcı kontrolleri
-├── Utils/                   # Bot servisleri ve ortak yardımcılar
-│   ├── Core/                # Ortam, kilit, log ve veri erişim araçları
-│   ├── Database/            # JSON/MongoDB çalışma katmanı ve geçişler
-│   └── Backup/              # Sunucu ve bot yedekleme
-├── Database/                # Yerel kayıtlar, çalışma durumu ve yedekler
-├── Settings/
-│   ├── .env.example         # Yapılandırma şablonu
-│   └── .env                 # Yerel ayarlar ve gizli bilgiler
-├── Tests/                   # Çekirdek ve veritabanı testleri
-├── assets/                  # Kart, rozet ve diğer görsel varlıklar
-├── .github/                 # Katkı politikaları, lint ve otomasyonlar
-├── ecosystem.config.js      # PM2 yapılandırması
-├── başlat.bat               # Windows yeniden başlatma döngüsü
-├── package.json             # Bağımlılıklar ve npm betikleri
-├── CHANGELOG.md             # Sürüm değişiklikleri
-└── LICENSE.md               # Lisans metni
-```
+Başlangıç panelleri olay/komut yükleme sonuçlarını ve etkinse Dashboard durumunu gösterir. Veritabanı veya etkin Dashboard'un yapılandırılması başarısız olursa açılış hata ile sonlanabilir, hata satırındaki eksik ayarı düzeltin. 
 
 <a id="gelistirme"></a>
 
