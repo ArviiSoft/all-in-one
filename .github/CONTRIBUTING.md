@@ -29,8 +29,6 @@ Yeni bir araç veya özellik eklenmesini öneriyorsanız, konsepti ve kullanım 
    ```bash
    git switch -c duzeltme/aciklama
    npm run lint
-   npm run database:test
-   npm run dashboard:test
    ```
    `npm test` botu başlatır; otomatik test komutu değildir. Gerçek MongoDB entegrasyon testleri yalnızca `ARVIS_TEST_MONGODB_URI` tanımlandığında çalışır.
 5. Değişikliğin amacını ve yaptığınız kontrolleri açıklayan bir pull request açın. Token, parola ve `Settings/.env` gibi özel ayarları paylaşmayın.
