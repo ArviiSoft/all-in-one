@@ -1,6 +1,6 @@
 const fs = require('../Core/databaseFs');
 const path = require('path');
-const { fetchPublicFeed, publicUrl } = require('./publicRss');
+const { fetchPublicFeed, getFeedImageUrl } = require('./publicRss');
 const { createJsonStore } = require('../Core/safeJsonStore');
 
 const dataPath = path.join(__dirname, '../../Database/Bildirimler ve Sosyal Medya/haberSistemi.json');
@@ -14,18 +14,6 @@ function normalizeId(item) {
     .split('#')[0] 
     .trim()
     .toLowerCase();
-}
-
-async function getImageFromHaber(haber) {
-  let image = haber.enclosure?.url;
-  if (!image && haber['media:content']?.url) image = haber['media:content'].url;
-
-  if (!image && haber.content) {
-    const match = haber.content.match(/<img[^>]+src=["']([^"']+)["']/);
-    if (match) image = match[1];
-  }
-
-  try { return image ? publicUrl(image).href : undefined; } catch { return undefined; }
 }
 
 module.exports = async (client) => {
@@ -65,7 +53,7 @@ module.exports = async (client) => {
         const description = haber.contentSnippet || haber.content || 'Detay yok';
         const uzunMu = description.length > 500;
         const trimmed = uzunMu ? description.slice(0, 500) + '...' : description;
-        const image = await getImageFromHaber(haber);
+        const image = getFeedImageUrl(haber);
 
         const embed = {
           color: 0x575757,
