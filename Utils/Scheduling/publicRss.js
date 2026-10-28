@@ -67,21 +67,30 @@ async function fetchPublicFeed(url) {
   return parser.parseString(await fetchPublicText(url));
 }
 
+function fullSizeImageUrl(raw) {
+  const url = publicUrl(raw);
+  if (url.hostname === 'ichef.bbci.co.uk') {
+    url.pathname = url.pathname.replace(/^\/ace\/ws\/(\d+)\//, (prefix, width) => (
+      Number(width) < 1280 ? '/ace/ws/1280/' : prefix
+    ));
+  }
+  return url.href;
+}
+
 function getFeedImageUrl(item) {
   const media = [item.enclosure, item['media:content'], item['media:thumbnail']].flat();
   for (const entry of media) {
-    // rss-parser keeps Media RSS attributes under `$`; enclosure attributes are flat.
     const attributes = entry?.$ || entry;
     if (!attributes?.url) continue;
     if (attributes.type && !/^image\//i.test(attributes.type)) continue;
     if (attributes.medium && attributes.medium !== 'image') continue;
-    try { return publicUrl(attributes.url).href; } catch { /* Try the next image. */ }
+    try { return fullSizeImageUrl(attributes.url); } catch {  }
   }
 
   for (const html of [item['content:encoded'], item.content]) {
     if (typeof html !== 'string') continue;
     for (const match of html.matchAll(/<img\b[^>]*\ssrc\s*=\s*["']([^"']+)["']/gi)) {
-      try { return publicUrl(match[1]).href; } catch { /* Try the next image. */ }
+      try { return fullSizeImageUrl(match[1]); } catch {  }
     }
   }
   return undefined;

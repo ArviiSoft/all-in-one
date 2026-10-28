@@ -43,7 +43,7 @@ function getGuildConfig(guildId) {
 
 function saveGuildConfig(guildId, config) {
   const data = loadData();
-  data[guildId] = normalizeConfig(config);
+  data[guildId] = { ...data[guildId], ...normalizeConfig(config) };
   writeJson(DB_PATH, data);
   return normalizeConfig(data[guildId]);
 }
@@ -408,6 +408,11 @@ async function validateDraft(guild, draft) {
     throw new Error(
       "Botun haber kanalında Kanalı Görüntüle, Mesaj Gönder ve Bağlantı Yerleştir izinleri olmalı."
     );
+  }
+
+  if (loadData()[guild.id]?.threads !== false
+    && !channel.permissionsFor(botMember)?.has(PermissionFlagsBits.CreatePublicThreads)) {
+    throw new Error("Botun haber kanalında Herkese Açık Alt Başlıklar Oluştur izni olmalı.");
   }
 
   if (draft.rol) {
