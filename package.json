@@ -15,7 +15,7 @@
   "dependencies": {
     "@discord-player/extractor": "^7.2.0",
     "@discordjs/voice": "^0.19.2",
-    "@napi-rs/canvas": "^1.0.11",
+    "@napi-rs/canvas": "^1.0.13",
     "@snazzah/davey": "^0.1.11",
     "apify-client": "^2.12.4",
     "archiver": "^8.0.0",
@@ -52,6 +52,8 @@
     "play-dl": "^1.9.7",
     "pm2": "^7.1.0",
     "puppeteer": "^25.14.0",
+    "pm2": "^7.0.4",
+    "puppeteer": "^25.16.0",
     "qrcode": "^1.5.4",
     "qrcode-reader": "^1.0.4",
     "request": "^2.88.2",
@@ -62,7 +64,7 @@
     "xml2js": "^0.6.2",
     "yaml": "^2.9.1",
     "youtube-ext": "^1.1.25",
-    "youtubei.js": "18.1.0"
+    "youtubei.js": "18.3.0"
   },
   "allowScripts": {
     "canvas@3.1.0": true,
@@ -72,7 +74,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "eslint": "^10.12.0",
+    "eslint": "^10.13.0",
     "globals": "^17.13.0"
   }
 }

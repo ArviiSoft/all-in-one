@@ -55,5 +55,36 @@ async function fetchPublicText(raw, redirects = 0) {
     req.on('error', reject);
   });
 }
-async function fetchPublicFeed(url) { return new Parser().parseString(await fetchPublicText(url)); }
-module.exports = { publicAddress, publicUrl, resolvePublic, fetchPublicText, fetchPublicFeed };
+async function fetchPublicFeed(url) {
+  const parser = new Parser({
+    customFields: {
+      item: [
+        ['media:content', 'media:content', { keepArray: true }],
+        ['media:thumbnail', 'media:thumbnail', { keepArray: true }],
+      ],
+    },
+  });
+  return parser.parseString(await fetchPublicText(url));
+}
+
+function getFeedImageUrl(item) {
+  const media = [item.enclosure, item['media:content'], item['media:thumbnail']].flat();
+  for (const entry of media) {
+    // rss-parser keeps Media RSS attributes under `$`; enclosure attributes are flat.
+    const attributes = entry?.$ || entry;
+    if (!attributes?.url) continue;
+    if (attributes.type && !/^image\//i.test(attributes.type)) continue;
+    if (attributes.medium && attributes.medium !== 'image') continue;
+    try { return publicUrl(attributes.url).href; } catch { /* Try the next image. */ }
+  }
+
+  for (const html of [item['content:encoded'], item.content]) {
+    if (typeof html !== 'string') continue;
+    for (const match of html.matchAll(/<img\b[^>]*\ssrc\s*=\s*["']([^"']+)["']/gi)) {
+      try { return publicUrl(match[1]).href; } catch { /* Try the next image. */ }
+    }
+  }
+  return undefined;
+}
+
+module.exports = { publicAddress, publicUrl, resolvePublic, fetchPublicText, fetchPublicFeed, getFeedImageUrl };
