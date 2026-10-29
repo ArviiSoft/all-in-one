@@ -144,6 +144,18 @@ Kullanılan kategori başlıkları:
 
 ---
 
+## [v1.9.13] - 29.10.2026
+
+### Düzeltildi
+
+- Haberlerin görsel çözünürlüğü ve alt başlık oluşturma hataları giderildi.
+  - RSS görsellerinde 1280 piksel sürümünün kullanılması sağlandı.
+  - Artık oluşturulan başarısız alt başlık işlemlerini kaydedip yeniden deniyor.
+  - Alt başlık izin kontrolleri ve hata loglaması eklendi.
+
+---
+
 [v1.9.10]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.10
 [v1.9.11]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.11
 [v1.9.12]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.12
+[v1.9.13]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.13
