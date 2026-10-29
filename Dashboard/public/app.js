@@ -950,7 +950,11 @@ function alanOlustur(alan, deger, degistir) {
   const id = `field-${++alanSayaci}`;
   if (alan.dynamicOptions) alan = { ...alan, type: 'select', options: [{ value: '', label: 'Listeden seçin…' }, ...(durum.drafts.get(`${durum.guildId}:${durum.route}`)?.options?.[alan.dynamicOptions] || [])] };
   if (alan.type === 'boolean') {
-    kutu.className = 'toggle-row'; const label = document.createElement('label'); label.htmlFor = id; label.textContent = alan.label; const input = document.createElement('input'); input.id = id; input.type = 'checkbox'; input.checked = deger === true; input.onchange = () => degistir(input.checked); kutu.append(label, input); return kutu;
+    kutu.className = 'toggle-row'; const label = document.createElement('label'); label.htmlFor = id; label.textContent = alan.label; const input = document.createElement('input'); input.id = id; input.type = 'checkbox'; input.checked = deger === true; input.onchange = () => degistir(input.checked);
+    if (alan.hint) {
+      const copy = document.createElement('div'); const hint = document.createElement('p'); hint.className = 'field-hint'; hint.id = `${id}-hint`; hint.textContent = alan.hint; input.setAttribute('aria-describedby', hint.id); copy.append(label, hint); kutu.append(copy, input);
+    } else kutu.append(label, input);
+    return kutu;
   }
   const label = document.createElement('label'); label.htmlFor = id; label.textContent = alan.label; kutu.append(label);
   if (['array', 'list'].includes(alan.type)) {
@@ -1081,18 +1085,52 @@ function islemleriGoster(modul, anahtar, yenile) {
     const copy = document.createElement('div'); copy.className = 'module-action-copy'; copy.append(heading, help);
     const fields = document.createElement('div'); fields.className = 'fields';
     taslak.actionDrafts ||= {}; const input = taslak.actionDrafts[action.id] ||= Object.fromEntries((action.fields || []).map(f => [f.key, varsayilan(f)]));
-    for (const field of action.fields || []) fields.append(alanOlustur(field, input[field.key], v => { input[field.key] = v; }));
+    taslak.actionSnapshots ||= {};
+    const snapshot = taslak.actionSnapshots[action.id];
+    for (const field of action.fields || []) {
+      if (action.loadRecord && !snapshot && field.key !== 'id') continue;
+      const element = alanOlustur(field, input[field.key], v => {
+        input[field.key] = v;
+        if (action.loadRecord && field.key === 'id') { delete taslak.actionSnapshots[action.id]; button.disabled = true; }
+      });
+      element.dataset.field = field.key; fields.append(element);
+    }
     const button = document.createElement('button'); button.type = 'submit'; button.className = `btn ${action.danger ? 'danger' : action.fields?.length ? 'primary' : 'ghost'}`; button.textContent = action.label;
     const output = document.createElement('p'); output.className = 'action-result'; output.setAttribute('role', 'status');
     output.textContent = taslak.actionResults?.[action.id] || '';
     form.append(copy, fields, button, output); actionGroup.append(form);
+    if (action.loadRecord) {
+      button.disabled = !snapshot;
+      const load = document.createElement('button'); load.type = 'button'; load.className = 'btn ghost'; load.dataset.loadRecord = ''; load.textContent = 'Mevcut ayarları yükle';
+      fields.querySelector('[data-field="id"]').append(load);
+      if (snapshot?.message) { const hint = document.createElement('p'); hint.className = 'field-hint'; hint.textContent = snapshot.message; copy.append(hint); }
+      load.onclick = async () => {
+        if (taslak.saving) return;
+        const id = input.id.trim();
+        if (!id) { output.textContent = 'Önce çekiliş ID değerini girin.'; return; }
+        taslak.saving = true; load.disabled = true; button.disabled = true; output.textContent = 'Ayarlar yükleniyor…';
+        try {
+          const response = await api(`/guilds/${guildId}/settings/${encodeURIComponent(modul.id)}/actions/${encodeURIComponent(action.id)}/records/${encodeURIComponent(id)}`);
+          taslak.actionDrafts[action.id] = kopya(response.input);
+          taslak.actionSnapshots[action.id] = response;
+          taslak.actionResults ||= {}; taslak.actionResults[action.id] = '';
+        } catch (error) { delete taslak.actionSnapshots[action.id]; taslak.actionResults ||= {}; taslak.actionResults[action.id] = error.message; }
+        finally { taslak.saving = false; if (`${durum.guildId}:${durum.route}` === anahtar) formGoster(modul, anahtar); }
+      };
+    }
     form.onsubmit = async event => {
       event.preventDefault(); if (taslak.saving) return;
       if (Object.keys(farklar(taslak)).length) { output.textContent = 'Önce ayar değişikliklerinizi kaydedin veya vazgeçin.'; return; }
+      if (action.loadRecord && !taslak.actionSnapshots[action.id]) { output.textContent = 'Önce çekilişin mevcut ayarlarını yükleyin.'; return; }
       if (action.confirm && !window.confirm(action.confirm)) return;
       taslak.saving = true; parent.querySelectorAll('input,select,textarea,button').forEach(el => { el.disabled = true; }); output.textContent = 'İşlem sürüyor…'; yenile();
       try {
-        const response = await api(`/guilds/${guildId}/settings/${encodeURIComponent(modul.id)}/actions/${encodeURIComponent(action.id)}`, 'POST', { input: kopya(input), revision: taslak.revision });
+        const changes = action.partial ? Object.fromEntries(Object.entries(input).filter(([key, value]) => key === 'id' || JSON.stringify(value) !== JSON.stringify(snapshot?.input[key]))) : kopya(input);
+        const response = await api(`/guilds/${guildId}/settings/${encodeURIComponent(modul.id)}/actions/${encodeURIComponent(action.id)}`, 'POST', { input: changes, revision: taslak.revision, ...(action.loadRecord ? { recordRevision: snapshot.recordRevision } : {}) });
+        if (action.loadRecord) {
+          taslak.actionDrafts[action.id] = { id: input.id, ...response.result.input };
+          taslak.actionSnapshots[action.id] = { ...response.result, input: kopya(taslak.actionDrafts[action.id]), message: `Mevcut bitiş: ${new Date(response.result.endTime).toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' })} (Türkiye saati).` };
+        }
         for (const field of action.fields || []) if (field.resetAfterRun) input[field.key] = varsayilan(field);
         taslak.values = kopya(response.values); taslak.original = kopya(response.values); taslak.revision = response.revision;
         taslak.details = response.details; taslak.options = response.options;

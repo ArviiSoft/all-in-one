@@ -4,11 +4,19 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, PermissionFl
 const ms = require("ms");
 const emojiler = require("../Emojis/emojiler.js");
 const statDb = require("../Core/jsonDB");
-const { requireEnabled, targetChannel } = require('./engagementSettings');
-const { randomBytes } = require('node:crypto');
+const { requireEnabled, targetChannel, getSettings } = require('./engagementSettings');
+const { randomBytes, createHash } = require('node:crypto');
 
 const cekilisFilePath = path.join(__dirname, "../../Database/Eğlence ve Etkileşim/cekilis.json");
 const PARTICIPANTS_PER_PAGE = 5;
+const giveawayQueues = new Map();
+
+function withGiveawayLock(id, operation) {
+  const previous = giveawayQueues.get(id) || Promise.resolve();
+  const pending = previous.catch(() => {}).then(operation);
+  giveawayQueues.set(id, pending);
+  return pending.finally(() => { if (giveawayQueues.get(id) === pending) giveawayQueues.delete(id); });
+}
 
 function ensureCekilisFile() {
   fs.mkdirSync(path.dirname(cekilisFilePath), { recursive: true });
@@ -44,6 +52,7 @@ function parseDurationInput(value) {
   if (!value) return null;
   if (typeof value === "number" && Number.isFinite(value) && value > 0) return value;
 
+  if (String(value).length > 100) return null;
   const direct = ms(String(value));
   if (typeof direct === "number" && Number.isFinite(direct) && direct > 0) return direct;
 
@@ -82,7 +91,8 @@ function parseDurationInput(value) {
     matched = true;
   }
 
-  return matched && total > 0 ? total : null;
+  const rest = String(value).toLowerCase().replace(regex, '').trim();
+  return matched && !rest && total > 0 ? total : null;
 }
 
 function formatDuration(durationMs) {
@@ -162,7 +172,7 @@ function normalizeGiveaway(raw) {
       blacklistedRoles: unique(requirements.blacklistedRoles || raw.blacklistedRoles),
       bypassRoles: unique(requirements.bypassRoles || raw.bypassRoles),
       bonusRoles: Array.isArray(requirements.bonusRoles) ? requirements.bonusRoles : [],
-      messageRequirement: requirements.messageRequirement || raw.messageRequirement || null,
+      messageRequirement: Object.hasOwn(requirements, 'messageRequirement') ? requirements.messageRequirement : raw.messageRequirement || null,
     },
   };
 }
@@ -590,13 +600,14 @@ async function sendGiveawayEndDMs(client, message, cekilis, winnerIds) {
   }
 }
 
-async function endGiveawayById(client, id, { force = false, announce = true } = {}) {
+async function endGiveawayByIdUnlocked(client, id, { force = false, announce = true, onlyIfDue = false } = {}) {
   const data = cekilisVerisiniOku();
   const existing = data[id];
   if (!existing) return { ok: false, reason: "not_found" };
 
   const cekilis = normalizeGiveaway(existing);
   if (cekilis.ended && !force) return { ok: false, reason: "already_ended", cekilis };
+  if (onlyIfDue && cekilis.endTime > Date.now()) return { ok: false, reason: 'not_due' };
 
   cekilis.ended = true;
   cekilis.endedAt = Date.now();
@@ -612,7 +623,7 @@ async function endGiveawayById(client, id, { force = false, announce = true } = 
   return { ok: true, cekilis, winnerIds: cekilis.winnerIds };
 }
 
-async function rerollGiveawayById(client, id) {
+async function rerollGiveawayByIdUnlocked(client, id) {
   const data = cekilisVerisiniOku();
   const existing = data[id];
   if (!existing) return { ok: false, reason: "not_found" };
@@ -633,7 +644,7 @@ async function rerollGiveawayById(client, id) {
   return { ok: true, cekilis, winnerIds: cekilis.winnerIds };
 }
 
-async function resetGiveawayParticipants(client, id) {
+async function resetGiveawayParticipantsUnlocked(client, id) {
   const data = cekilisVerisiniOku();
   const existing = data[id];
   if (!existing) return { ok: false, reason: "not_found" };
@@ -649,11 +660,117 @@ async function resetGiveawayParticipants(client, id) {
 }
 
 function canManageGiveaway(interaction, cekilis) {
+  if (interaction.guildId !== cekilis.guildId) return false;
   if (interaction.user.id === cekilis.hostId) return true;
   return Boolean(
     interaction.memberPermissions?.has(PermissionFlagsBits.Administrator) ||
       interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild)
   );
+}
+
+function endGiveawayById(client, id, options) { return withGiveawayLock(id, () => endGiveawayByIdUnlocked(client, id, options)); }
+function rerollGiveawayById(client, id) { return withGiveawayLock(id, () => rerollGiveawayByIdUnlocked(client, id)); }
+function resetGiveawayParticipants(client, id) { return withGiveawayLock(id, () => resetGiveawayParticipantsUnlocked(client, id)); }
+
+function giveawayEditState(raw) {
+  const record = normalizeGiveaway(raw);
+  const req = record.requirements;
+  const input = {
+    channelId: record.channelId, durationSeconds: null, prize: record.prize, winners: record.winners,
+    donorId: record.donorId, imageUrl: record.imageUrl, description: record.description,
+    message: record.message || '', extra: record.extra, ping: record.ping, donorNoWin: record.donorNoWin, noDefaults: record.noDefaults,
+    requiredRoles: req.requiredRoles, blacklistedRoles: req.blacklistedRoles, bypassRoles: req.bypassRoles, bonusRoles: req.bonusRoles,
+    messageCount: req.messageRequirement?.amount || 0, messageChannelId: req.messageRequirement?.channelId || null,
+    messageWindowSeconds: req.messageRequirement?.cooldownMs ? req.messageRequirement.cooldownMs / 1000 : null,
+  };
+  const recordRevision = createHash('sha256').update(JSON.stringify({ ...input, endTime: record.endTime, ended: record.ended })).digest('hex');
+  return { input, recordRevision, endTime: record.endTime };
+}
+
+function defaultRequirements(config) {
+  return {
+    requiredRoles: config.requiredRoles || [], blacklistedRoles: config.blacklistedRoles || [], bypassRoles: config.bypassRoles || [],
+    bonusRoles: config.bonusRoleId ? [{ roleId: config.bonusRoleId, amount: config.bonusAmount }] : [],
+    messageRequirement: config.messageCount ? { amount: config.messageCount, channelId: config.messageChannelId, cooldownMs: config.messageWindowSeconds * 1000 } : null,
+  };
+}
+
+async function editGiveawayById(client, guild, id, patch, { recordRevision, member } = {}) {
+  return withGiveawayLock(id, async () => {
+    const existing = cekilisVerisiniOku()[id];
+    if (!existing || existing.guildId !== guild.id) throw new RangeError('Çekiliş bu sunucuda bulunamadı.');
+    const current = normalizeGiveaway(existing);
+    if (current.ended) throw new RangeError('Bitmiş bir çekiliş düzenlenemez.');
+    if (recordRevision && recordRevision !== giveawayEditState(current).recordRevision) throw new RangeError('Çekiliş başka bir yerden değiştirildi. Güncel değerleri yükleyin.');
+    const allowed = new Set([...Object.keys(giveawayEditState(current).input), 'durationMs']);
+    if (!patch || !Object.keys(patch).length) throw new RangeError('Düzenlemek için en az bir ayar belirtin.');
+    if (Object.keys(patch).some(key => !allowed.has(key))) throw new RangeError('Bilinmeyen çekiliş ayarı.');
+    const next = structuredClone(current);
+    for (const key of ['prize', 'description', 'message', 'extra', 'imageUrl', 'donorId', 'channelId', 'winners', 'ping', 'donorNoWin', 'noDefaults']) {
+      if (Object.hasOwn(patch, key)) next[key] = patch[key];
+    }
+    for (const [key, max] of [['prize', 256], ['description', 1500], ['message', 2000], ['extra', 1500]]) {
+      if (typeof next[key] !== 'string' && !(key === 'message' && next[key] === null)) throw new RangeError('Geçerli bir metin girin.');
+      if ((next[key]?.length || 0) > max) throw new RangeError(`Metin en fazla ${max} karakter olabilir.`);
+    }
+    if (!next.prize.trim()) throw new RangeError('Ödül boş olamaz.');
+    if (!Number.isInteger(next.winners) || next.winners < 1 || next.winners > 50) throw new RangeError('Kazanan sayısı 1–50 arasında olmalı.');
+    for (const key of ['ping', 'donorNoWin', 'noDefaults']) if (typeof next[key] !== 'boolean') throw new RangeError('Açık veya kapalı seçin.');
+    if (next.imageUrl) {
+      try { next.imageUrl = require('../Scheduling/publicRss').publicUrl(next.imageUrl).href; }
+      catch { throw new RangeError('Genel internette erişilebilir bir HTTPS görsel bağlantısı girin.'); }
+    }
+    if (patch.donorId && (!/^\d{17,20}$/.test(patch.donorId) || (await guild.members.fetch(patch.donorId).catch(() => null))?.id !== patch.donorId)) throw new RangeError('Bağışçı bu sunucuda bulunamadı.');
+    const durationMs = patch.durationMs ?? (patch.durationSeconds == null ? null : patch.durationSeconds * 1000);
+    if (durationMs !== null) {
+      if (!Number.isSafeInteger(durationMs) || durationMs < 5000 || !Number.isSafeInteger(Date.now() + durationMs) || Date.now() + durationMs > 8640000000000000) throw new RangeError('Geçerli bir kalan süre girin (en az 5 saniye).');
+      next.endTime = Date.now() + durationMs;
+    }
+    if (next.noDefaults !== current.noDefaults) next.requirements = defaultRequirements(next.noDefaults ? {} : getSettings(guild.id, 'cekilis'));
+    const req = next.requirements;
+    for (const key of ['requiredRoles', 'blacklistedRoles', 'bypassRoles']) {
+      if (Object.hasOwn(patch, key)) req[key] = patch[key];
+      if (!Array.isArray(req[key]) || req[key].length > 20 || req[key].some(roleId => !guild.roles.cache.has(roleId))) throw new RangeError('Bu sunucudan en fazla 20 geçerli rol seçin.');
+      req[key] = unique(req[key]);
+    }
+    if (req.requiredRoles.some(roleId => req.blacklistedRoles.includes(roleId))) throw new RangeError('Aynı rol hem gerekli hem yasaklı olamaz.');
+    if (Object.hasOwn(patch, 'bonusRoles')) req.bonusRoles = patch.bonusRoles;
+    if (!Array.isArray(req.bonusRoles) || req.bonusRoles.length > 20 || req.bonusRoles.some(b => !guild.roles.cache.has(b.roleId) || !Number.isInteger(b.amount) || b.amount < 1 || b.amount > 100) || new Set(req.bonusRoles.map(b => b.roleId)).size !== req.bonusRoles.length) throw new RangeError('Bonus rolleri geçerli, tekil ve ek hakları 1–100 arasında olmalı.');
+    if (['messageCount', 'messageChannelId', 'messageWindowSeconds'].some(key => Object.hasOwn(patch, key))) {
+      const amount = patch.messageCount ?? req.messageRequirement?.amount ?? 0;
+      if (!Number.isInteger(amount) || amount < 0 || amount > 10000) throw new RangeError('Mesaj sayısı 0–10000 arasında olmalı.');
+      const channelId = Object.hasOwn(patch, 'messageChannelId') ? patch.messageChannelId : req.messageRequirement?.channelId;
+      const seconds = Object.hasOwn(patch, 'messageWindowSeconds') ? patch.messageWindowSeconds : (req.messageRequirement?.cooldownMs ? req.messageRequirement.cooldownMs / 1000 : null);
+      if (seconds !== null && (!Number.isSafeInteger(seconds) || seconds < 1 || seconds > 2592000)) throw new RangeError('Mesaj şartı süresi 1–2592000 saniye olmalı.');
+      req.messageRequirement = amount ? { amount, channelId, cooldownMs: seconds === null ? null : seconds * 1000 } : null;
+    }
+    const canView = channel => !member || channel.permissionsFor(member)?.has(PermissionFlagsBits.ViewChannel);
+    const channel = await targetChannel(guild, next.channelId, [PermissionFlagsBits.EmbedLinks, PermissionFlagsBits.ReadMessageHistory]);
+    const oldChannel = await targetChannel(guild, current.channelId, [PermissionFlagsBits.EmbedLinks, PermissionFlagsBits.ReadMessageHistory]);
+    if (!canView(channel) || !canView(oldChannel)) throw new RangeError('Çekiliş kanalına erişim yetkiniz yok.');
+    if (req.messageRequirement) {
+      const requirementChannel = await targetChannel(guild, req.messageRequirement.channelId, [PermissionFlagsBits.ReadMessageHistory]);
+      if (!canView(requirementChannel)) throw new RangeError('Mesaj şartı kanalına erişim yetkiniz yok.');
+    }
+    const oldMessage = await oldChannel.messages.fetch(current.messageId).catch(() => null);
+    if (!oldMessage) throw new RangeError('Çekiliş mesajı bulunamadı; değişiklikler kaydedilmedi.');
+    const payload = await buildGiveawayPayload(client, id, next);
+    let replacement;
+    try {
+      if (next.channelId === current.channelId) await oldMessage.edit(payload);
+      else {
+        replacement = await channel.send(payload);
+        next.messageId = replacement.id;
+        await oldMessage.edit({ content: `Çekiliş taşındı: https://discord.com/channels/${guild.id}/${next.channelId}/${next.messageId}`, embeds: [], components: [], allowedMentions: { parse: [] } });
+      }
+      const data = cekilisVerisiniOku(); data[id] = { ...existing, ...next }; cekilisVerisiniYaz(data);
+    } catch (error) {
+      if (replacement) await replacement.delete().catch(() => {});
+      await oldMessage.edit(await buildGiveawayPayload(client, id, current)).catch(() => {});
+      throw error;
+    }
+    return { ok: true, cekilis: next };
+  });
 }
 
 async function createGiveaway(interaction, client) {
@@ -757,10 +874,8 @@ async function startGiveaway(client, guild, fallbackChannelId, hostId, input) {
   return { id, messageId: message.id };
 }
 
-async function handleJoin(interaction, client, id, cekilis, data) {
-  await interaction.deferReply({ flags: 64 });
-
-  if (cekilis.ended) {
+async function handleJoin(interaction, client, id, cekilis) {
+  if (cekilis.ended || cekilis.endTime <= Date.now()) {
     return interaction.editReply({ content: `${emojiler.uyari} **Bu çekiliş artık aktif değil.**` });
   }
 
@@ -775,8 +890,8 @@ async function handleJoin(interaction, client, id, cekilis, data) {
   }
 
   cekilis.participants.push(interaction.user.id);
-  data[id] = cekilis;
-  cekilisVerisiniYaz(data);
+  const latest = cekilisVerisiniOku(); latest[id] = cekilis;
+  cekilisVerisiniYaz(latest);
 
   await updateGiveawayMessage(client, id, cekilis).catch((err) => {
     console.error("🔴 [ÇEKİLİŞ] Mesaj güncellenemedi:", err);
@@ -852,7 +967,12 @@ async function handleGiveawayInteraction(interaction, client) {
   const cekilis = normalizeGiveaway(existing);
 
   if (action === "join") {
-    await handleJoin(interaction, client, id, cekilis, data);
+    await interaction.deferReply({ flags: 64 });
+    await withGiveawayLock(id, async () => {
+      const latest = cekilisVerisiniOku();
+      if (!latest[id] || latest[id].guildId !== interaction.guildId) return interaction.editReply({ content: 'Çekiliş bulunamadı.' });
+      await handleJoin(interaction, client, id, normalizeGiveaway(latest[id]));
+    });
     return true;
   }
 
@@ -920,7 +1040,7 @@ function cekilisleriYukle(client) {
       for (const [id, raw] of Object.entries(data)) {
         const cekilis = normalizeGiveaway(raw);
         if (!cekilis.ended && cekilis.endTime <= now) {
-          await endGiveawayById(client, id);
+          await endGiveawayById(client, id, { onlyIfDue: true });
         }
       }
     } catch (err) {
@@ -940,6 +1060,11 @@ module.exports = {
   cekilisVerisiniYaz,
   createGiveaway,
   startGiveaway,
+  editGiveawayById,
+  giveawayEditState,
+  canManageGiveaway,
+  parseDurationInput,
+  parseMessageRequirement,
   endGiveawayById,
   handleGiveawayInteraction,
   rerollGiveawayById,

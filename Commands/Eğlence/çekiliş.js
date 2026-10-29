@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require("discord.js");
 const emojiler = require("../../Utils/Emojis/emojiler.js");
+const { editSubcommand, executeEdit } = require('../../Utils/Engagement/giveawayEditCommand');
 const { createGiveaway, endGiveawayById, rerollGiveawayById, resetGiveawayParticipants } = require("../../Utils/Engagement/çekilişKontrol.js");
 
 function formatUsers(userIds) {
@@ -11,6 +12,7 @@ module.exports = {
     .setName("çekiliş")
     .setDescription("Gelişmiş çekiliş sistemi.")
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+    .addSubcommand(editSubcommand)
     .addSubcommand((sub) =>
       sub
         .setName("başlat")
@@ -143,6 +145,7 @@ module.exports = {
 
   async execute(interaction, client) {
     const sub = interaction.options.getSubcommand();
+    if (sub === 'düzenle') return executeEdit(interaction, client);
 
     if (sub === "başlat") {
       return createGiveaway(interaction, client);

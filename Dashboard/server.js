@@ -141,7 +141,7 @@ function createDashboard(client, ayarlar, enjekte = {}) {
     const avatar = await normalizeAvatar(req.body.avatar);
     res.json(profiles.write(profileKey(req), avatar));
   });
-  app.get('/api/registry', (req, res) => res.json(visibleRegistry(req).map(({ read, write, validate, details, options, ...tanim }) => ({ ...tanim, actions: (tanim.actions || []).map(({ run, ...action }) => action) }))));
+  app.get('/api/registry', (req, res) => res.json(visibleRegistry(req).map(({ read, write, validate, details, options, ...tanim }) => ({ ...tanim, actions: (tanim.actions || []).map(({ run, load, ...action }) => action) }))));
   app.get('/api/guilds', async (req, res) => {
     const allowed = discordSession(req) ? new Set((await oauth.guilds(req.session)).map(g => g.id)) : null;
     res.json([...client.guilds.cache.values()].filter(g => !allowed || allowed.has(g.id)).map(g => ({ id: g.id, name: g.name, memberCount: g.memberCount, icon: g.iconURL?.({ size: 64 }) || null })));
@@ -217,13 +217,21 @@ function createDashboard(client, ayarlar, enjekte = {}) {
     try { res.json(await islem); }
     finally { if (kuyruklar.get(anahtar) === islem) kuyruklar.delete(anahtar); }
   });
+  app.get('/api/guilds/:guildId/settings/:moduleId/actions/:actionId/records/:recordId', async (req, res) => {
+    const modul = modulBul(req);
+    const action = modul.actions?.find(a => a.id === req.params.actionId && a.loadRecord && a.load);
+    if (!action) throw new AyarHatasi('İşlem bulunamadı.', 404);
+    const result = await action.load(req.guild, req.params.recordId, req.member);
+    if (req.member) assertFieldReadAccess(action.fields, result.input, req.guild, req.member);
+    res.json(result);
+  });
   app.post('/api/guilds/:guildId/settings/:moduleId/actions/:actionId', async (req, res) => {
     const modul = modulBul(req);
     const action = modul.actions?.find(a => a.id === req.params.actionId);
     if (!action) throw new AyarHatasi('İşlem bulunamadı.', 404);
     const fields = action.fields || [];
     const supplied = req.body?.input;
-    if (!supplied || typeof supplied !== 'object' || Array.isArray(supplied) || fields.some(f => !Object.hasOwn(supplied, f.key))) throw new AyarHatasi('İşlem alanları eksik.');
+    if (!supplied || typeof supplied !== 'object' || Array.isArray(supplied) || fields.some(f => (!action.partial || f.required) && !Object.hasOwn(supplied, f.key))) throw new AyarHatasi('İşlem alanları eksik.');
     const input = fields.length ? yamaDogrula({ fields }, supplied, req.guild, client) : {};
     if (!fields.length && Object.keys(supplied).length) throw new AyarHatasi('Bilinmeyen işlem alanı.');
     const anahtar = modul.store;
@@ -237,7 +245,7 @@ function createDashboard(client, ayarlar, enjekte = {}) {
         assertFieldAccess(fields, input, req.guild, req.member);
         await assertActionAccess(modul.id, action.id, req.guild, req.member, input, mevcut);
       }
-      const result = await action.run(req.guild, input, { username: username(req), userId: req.session.user?.id }, req.member);
+      const result = await action.run(req.guild, input, { username: username(req), userId: req.session.user?.id }, req.member, { recordRevision: req.body?.recordRevision });
       await require('../Utils/Database/runtime').flushDatabase();
       return { ...await yanit(modul, req.guild, req.member), result };
     });

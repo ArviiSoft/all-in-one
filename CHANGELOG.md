@@ -155,7 +155,32 @@ Kullanılan kategori başlıkları:
 
 ---
 
+## [v1.9.14] - 29.10.2026
+
+### Eklendi
+
+- Aktif çekilişlerin tüm ayarlarını değiştirmek için `/çekiliş düzenle` altkomutu eklendi.
+- Web Dashboard'a mevcut çekiliş ayarlarını ID ile yükleyip düzenleme bölümü eklendi. Ödül, süre, kazanan sayısı, kanal, bağışçı, roller, bonus hakları, mesaj şartı, ping, varsayılan şartlar, açıklamalar ve görsel iki taraftan da değiştirilebilir.
+- Rol ve mesaj şartlarını kaldırma, birden çok bonus rolü tanımlama ve bağışçı, görsel veya metin alanlarını temizleme seçenekleri eklendi.
+
+### Değiştirildi
+
+- Çekiliş düzenlenirken yalnızca belirtilen ayarlar değiştirilir, katılımcılar korunur ve kazananlar güncel şartlara göre seçilir. Yeni süre, düzenleme anından itibaren hesaplanır. Süre belirtilmezse mevcut bitiş zamanı korunur.
+- Düzenleme sonrasında Discord çekiliş mesajı güncellenir. Kanal değiştirildiğinde aynı çekiliş ID'si ve katılımcılar korunur, eski mesaj yeni konuma yönlendirir.
+- Varsayılan şartları yok sayma seçimi değiştirildiğinde şartlar temizlenir veya sunucu varsayılanları yeniden uygulanır, aynı işlemde açıkça verilen şartlar öncelikli olur.
+
+### Düzeltildi
+
+- `string-width` paketinin yeni dışa aktarma biçimiyle uyumsuz yüklenmesinden kaynaklanan `TypeError: stringWidth is not a function` açılış hatası giderildi.
+- Çekiliş düzenleme, katılım, bitirme ve sıfırlama işlemleri aynı çekiliş için sıraya alındı. Eşzamanlı işlemlerde katılımcıların veya güncel ayarların kaybolması ve süre uzatıldıktan sonra eski bitiş kontrolünün çekilişi sonlandırması engellendi.
+- Eski bir panel taslağının komuttan veya başka bir yönetici tarafından değiştirilmiş çekiliş ayarlarını ezmesi engellendi. Değişen kayıtlar için güncel ayarların yeniden yüklenmesi sağlandı.
+- Discord mesajı güncellenemediğinde düzenlemenin başarılı sayılması engellendi, başarısız taşıma işleminde oluşturulan yeni mesajın temizlenmesi ve önceki mesajın geri yüklenmesi eklendi.
+- Eski çekiliş kayıtlarında kaldırılan mesaj şartının yeniden etkinleşmesi düzeltildi. Geçersiz ek metin içeren sürelerin kabul edilmesi engellendi.
+
+---
+
 [v1.9.10]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.10
 [v1.9.11]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.11
 [v1.9.12]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.12
 [v1.9.13]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.13
+[v1.9.14]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.14

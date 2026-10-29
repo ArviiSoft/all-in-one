@@ -6,6 +6,7 @@ const { createCommunityStore } = require('../stores/community');
 const { getSettings, updateSettings, targetChannel } = require('../../Utils/Engagement/engagementSettings');
 const { publicUrl } = require('../../Utils/Scheduling/publicRss');
 const db = createCommunityStore();
+const emojiler = require('../../Utils/Emojis/emojiler.js');
 const FILES = { cekilis: 'Eğlence ve Etkileşim/cekilis.json', 'oy-yarismasi': 'Eğlence ve Etkileşim/oyYarismasi.json', 'oylama-baslat': 'Eğlence ve Etkileşim/oylama.json' };
 const PERMISSIONS = { cekilis: [P.EmbedLinks, P.ReadMessageHistory], 'oy-yarismasi': [P.AttachFiles, P.ReadMessageHistory], 'oylama-baslat': [P.AddReactions, P.ReadMessageHistory, P.ManageMessages] };
 function records(guild, id) { return Object.entries(db.read(FILES[id])).filter(([, record]) => record.guildId === guild.id); }
@@ -39,7 +40,7 @@ function details(guild, id, member) {
     return `${key} · ${name} · ${record.ended ? 'Bitti' : 'Aktif'}${count === null ? '' : ` · ${count} ${id === 'cekilis' ? 'katılımcı' : 'oy'}`} · #${guild.channels.cache.get(record.channelId || record.kanalId)?.name || 'silinmiş kanal'}`;
   });
 }
-module.exports = function register({ client, ekle, b, n, t, c, r, s, a }) {
+module.exports = function register({ client, ekle, b, n, t, c, r, s, a, l }) {
   const category = 'Eğlence ve Etkileşim';
   const store = 'Utils/Engagement/engagementSettings.js';
   const base = label => [b('enabled', `${label} komutu etkin`, true), { ...c('channelId', 'Yayın kanalı'), hint: 'Panelden başlatmak için seçin. Boşsa Discord komutu kullanıldığı kanala gönderir.' }];
@@ -65,14 +66,45 @@ module.exports = function register({ client, ekle, b, n, t, c, r, s, a }) {
       const result = await require('../../Utils/Engagement/çekilişKontrol').startGiveaway(client, g, null, client.user.id, { ...input, imageUrl });
       return { message: `Çekiliş başlatıldı. ID: ${result.id}` };
     } },
+    {
+      id: 'edit', label: 'Çekilişi düzenle', loadRecord: true, partial: true,
+      description: 'ID ile mevcut ayarları yükleyin. Yalnızca değiştirdiğiniz alanlar uygulanır; katılımcılar korunur ve kazananlar güncel şartlara göre seçilir. Boş rol listeleri ve metinler ilgili şartı veya içeriği kaldırır.',
+      fields: [
+        { ...recordId(), required: true }, c('channelId', 'Çekiliş kanalı', false),
+        { ...n('durationSeconds', 'Yeni kalan süre · saniye', 5, 2592000), nullable: true, hint: 'Boşsa mevcut bitiş korunur. Girilirse kaydettiğiniz andan itibaren hesaplanır. 2 gün = 172800 saniye.' },
+        t('prize', 'Ödül', 256, { minLength: 1 }), n('winners', 'Kazanan sayısı', 1, 50, 1),
+        t('donorId', 'Bağışçı üye ID · boş bırakarak kaldırın', 20, { nullable: true }),
+        t('imageUrl', 'Görsel bağlantısı · HTTPS, boş bırakarak kaldırın', 2000, { nullable: true }),
+        t('description', 'Açıklama', 1500, { multiline: true }), t('message', 'Çekiliş üst mesajı', 2000, { multiline: true }), t('extra', 'Ek açıklama', 1500, { multiline: true }),
+        roles('requiredRoles', 'Gerekli roller'), roles('blacklistedRoles', 'Yasaklı roller'), roles('bypassRoles', 'Şartları atlayan roller'),
+        l('bonusRoles', 'Bonus roller', [{ ...role('roleId', 'Bonus rolü'), nullable: false }, n('amount', 'Ek katılım hakkı', 1, 100, 1)], 20),
+        n('messageCount', 'Gerekli mesaj sayısı · 0 kapatır', 0, 10000, 0), c('messageChannelId', 'Mesaj şartı kanalı'),
+        { ...n('messageWindowSeconds', 'Mesaj şartı zaman aralığı · saniye', 1, 2592000), nullable: true, hint: 'Boşsa mesaj şartında zaman sınırı uygulanmaz.' },
+        b('ping', 'Etiketler bildirim gönderebilsin'), b('donorNoWin', 'Bağışçı kazanamasın'),
+        { ...b('noDefaults', 'Varsayılan şartları yok say'), hint: 'Bu seçimi değiştirmek şartları yeniden kurar: açmak şartları temizler, kapatmak sunucunun varsayılan şartlarını uygular. Aynı işlemde değiştirdiğiniz şartlar önceliklidir.' },
+      ],
+      load: async (g, id, member) => {
+        const record = recordFor(g, 'cekilis', id, member);
+        if (record.ended) throw new AyarHatasi('Bitmiş bir çekiliş düzenlenemez.');
+        const state = require('../../Utils/Engagement/çekilişKontrol').giveawayEditState(record);
+        return { ...state, input: { id, ...state.input }, message: `Mevcut bitiş: ${new Date(state.endTime).toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' })} (Türkiye saati).` };
+      },
+      run: async (g, input, _actor, member, context = {}) => {
+        recordFor(g, 'cekilis', input.id, member);
+        if (!context.recordRevision) throw new AyarHatasi('Önce çekilişin mevcut ayarlarını yükleyin.');
+        const { id, ...patch } = input;
+        const result = await require('../../Utils/Engagement/çekilişKontrol').editGiveawayById(client, g, id, patch, { recordRevision: context.recordRevision, member });
+        return { message: `${emojiler.tik} Çekiliş düzenlendi. ID: ${id}.`, ...require('../../Utils/Engagement/çekilişKontrol').giveawayEditState(result.cekilis) };
+      },
+    },
     ...[['end', 'Çekilişi bitir', 'endGiveawayById'], ['reroll', 'Kazananları yeniden seç', 'rerollGiveawayById'], ['reset', 'Katılımcıları sıfırla', 'resetGiveawayParticipants']].map(([id, label, method]) => ({ id, label, fields: [recordId()], ...(id === 'reset' ? { danger: true, confirm: 'Bu çekilişin tüm katılımcıları ve kazananları sıfırlansın mı?' } : {}), run: async (g, input, _actor, member) => {
       const record = recordFor(g, 'cekilis', input.id, member);
       await targetChannel(g, record.channelId, PERMISSIONS.cekilis);
       const result = await require('../../Utils/Engagement/çekilişKontrol')[method](client, input.id);
       if (!result.ok) throw new AyarHatasi(result.reason === 'already_ended' ? 'Bu çekiliş zaten bitmiş.' : result.reason === 'not_ended' ? 'Önce çekilişi bitirin.' : 'Çekiliş bulunamadı.');
-      return { message: `${label}: işlem tamamlandı.` };
+      return { message: `${emojiler.tik} ${label}: işlem tamamlandı.` };
     } })),
-  ], 'Ayarlar yeni çekilişlerde uygulanır. Discord komutunda açıkça verilen seçenekler varsayılanları geçersiz kılar. Komutu kapatmak mevcut çekilişleri durdurmaz. Panelden başlatılan çekilişin sahibi bottur.'));
+  ], 'Genel ayarlar yeni çekilişlerde uygulanır. Aktif bir çekilişi değiştirmek için Çekilişi düzenle bölümünü kullanın. Komutu kapatmak mevcut çekilişleri durdurmaz. Panelden başlatılan çekilişin sahibi bottur.'));
 
   registerSettings('oy-yarismasi', 'Oy yarışması', 'Butonlu ve görselli yarışmaların süresini, başlığını ve temasını ayarlayın.', [
     ...base('Oy yarışması'), n('durationSeconds', 'Yarışma süresi · saniye', 10, 2592000, 300),

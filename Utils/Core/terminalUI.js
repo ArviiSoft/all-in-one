@@ -1,6 +1,7 @@
 const os = require("os");
 const readline = require("readline");
-const stringWidth = require("string-width");
+const stringWidthModule = require("string-width");
+const stringWidth = stringWidthModule.default ?? stringWidthModule;
 const packageInfo = require("../../package.json");
 
 // eslint-disable-next-line no-control-regex -- Görünür metin genişliği hesaplanırken ANSI kodlarındaki ESC karakteri temizlenir.
