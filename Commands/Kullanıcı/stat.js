@@ -930,7 +930,7 @@ function formatDateTime(value) {
 
 function cleanText(value) {
   return String(value || "")
-    // eslint-disable-next-line no-control-regex -- Kart metnindeki ASCII kontrol karakterleri bilerek temizlenir.
+    // eslint-disable-next-line no-control-regex
     .replace(/[\u0000-\u001F\u007F]/g, "")
     .trim();
 }

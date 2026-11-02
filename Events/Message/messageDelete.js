@@ -68,11 +68,11 @@ client.on("messageDelete", async (message) => {
       try {
         await user.send({ embeds: [embed], components: [row] });
       } catch {
-        console.log(`⚠️ [ETİKET-BİLDİRİM HATA] ${user.tag} adlı kullanıcıya DM gönderilemedi.`);
+        console.log(`🔴 [ETİKET-BİLDİRİM HATA] ${user.tag} adlı kullanıcıya DM gönderilemedi.`);
       }
     }
   } catch (err) {
-    console.error("⚠️ [MESSAGEDELETE HATA] Eventte hata:", err);
+    console.error("🔴 [MESSAGEDELETE HATA] Eventte hata:", err);
   }
 });
 
@@ -152,6 +152,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
       });
     }
   } catch (err) {
-    console.error("⚠️ [ETIKETDM INTERACTION]:", err);
+    console.error("🔴 [ETIKETDM INTERACTION]:", err);
   }
 });

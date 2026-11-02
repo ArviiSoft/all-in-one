@@ -92,6 +92,7 @@ async function fetchApplicationEmojis(client) {
   }
 
   const fetched = await client.application.emojis.fetch();
+  await require("./musicEmojis").ensureMusicEmojis(client, fetched);
   const nextByLookupKey = new Map();
   const nextById = new Map();
   const ambiguousKeys = new Set();

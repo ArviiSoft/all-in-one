@@ -37,13 +37,13 @@ module.exports = client => {
   client.on('clientReady', async () => {
     try {
       const failures = await service.refreshOpenSessions(client);
-      for (const failure of failures) console.warn('[MODMAIL] Açık talep güncellenemedi:', failure);
-    } catch (error) { console.error('[MODMAIL] Açık talepler güncellenemedi:', errorDetails(error)); }
+      for (const failure of failures) console.warn('⚠️ [MODMAIL] Açık talep güncellenemedi:', failure);
+    } catch (error) { console.error('🔴 [MODMAIL] Açık talepler güncellenemedi:', errorDetails(error)); }
   });
   client.on('channelDelete', async channel => {
     const session = store.getSession(channel.id);
     if (!session || session.status !== 'open') return;
     try { await service.closeSession(channel.guild, channel.id, null, 'Talep kanalı silindi.'); }
-    catch (error) { console.error('[MODMAIL] Silinen kanalın kaydı korundu; panelden kapatma yeniden denenebilir:', errorDetails(error)); }
+    catch (error) { console.error('🔴 [MODMAIL] Silinen kanalın kaydı korundu; panelden kapatma yeniden denenebilir:', errorDetails(error)); }
   });
 };

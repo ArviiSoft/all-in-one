@@ -41,7 +41,7 @@ module.exports = {
             avatarDecorationURL: images.avatarDecorationURL });
           cardAttachment = new AttachmentBuilder(card, { name: cardName });
         } catch (error) {
-          console.warn("[HESAP BİLGİ] Durum kartı oluşturulamadı:", error?.message || error);
+          console.warn("⚠️ [HESAP BİLGİ] Durum kartı oluşturulamadı:", error?.message || error);
         }
       }
       await interaction.editReply(buildAccountPayload({

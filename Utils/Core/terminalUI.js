@@ -4,7 +4,7 @@ const stringWidthModule = require("string-width");
 const stringWidth = stringWidthModule.default ?? stringWidthModule;
 const packageInfo = require("../../package.json");
 
-// eslint-disable-next-line no-control-regex -- Görünür metin genişliği hesaplanırken ANSI kodlarındaki ESC karakteri temizlenir.
+// eslint-disable-next-line no-control-regex
 const ANSI_PATTERN = /\x1B\[[0-?]*[ -/]*[@-~]/g;
 const GRAPHEME_SEGMENTER = new Intl.Segmenter("tr", { granularity: "grapheme" });
 const COLORS_ENABLED = process.env.NO_COLOR === undefined

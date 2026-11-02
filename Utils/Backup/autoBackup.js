@@ -462,7 +462,7 @@ async function createZipBackup(options = {}) {
     output.on("close", resolve);
     output.on("error", reject);
     archive.on("warning", error => {
-      if (error.code === "ENOENT") console.warn("[AUTO BACKUP] Dosya atlandı:", error.message);
+      if (error.code === "ENOENT") console.warn("⚠️ [AUTO BACKUP] Dosya atlandı:", error.message);
       else reject(error);
     });
     archive.on("error", reject);

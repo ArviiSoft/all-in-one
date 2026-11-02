@@ -16,7 +16,7 @@ const lastMessages = new Map();
 const suppressedMessages = new Map();
 const pendingRecords = [];
 
-// eslint-disable-next-line no-control-regex -- ANSI renk kodlarını temizlemek için ESC karakteri bilerek eşleştirilir.
+// eslint-disable-next-line no-control-regex
 const ANSI_PATTERN = /\x1B\[[0-?]*[ -/]*[@-~]/g;
 const MAX_COMPONENT_BODY_LENGTH = 3_600;
 const MAX_COMPONENT_CHARACTERS_PER_MESSAGE = 5_800;

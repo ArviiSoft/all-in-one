@@ -139,7 +139,7 @@ function contain(context, image, x, y, width, height) {
 }
 
 function cleanText(value) {
-  // eslint-disable-next-line no-control-regex -- Kart metnindeki ASCII kontrol karakterleri bilerek boşlukla değiştirilir.
+  // eslint-disable-next-line no-control-regex
   return String(value || '').replace(/[\r\n\u0000-\u001f\u007f]/g, ' ').trim().slice(0, 256);
 }
 

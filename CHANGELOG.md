@@ -179,8 +179,34 @@ Kullanılan kategori başlıkları:
 
 ---
 
+## [v1.9.15] - 02.11.2026
+
+### Eklendi
+
+- Müzik sistemi kontrol paneli değiştirildi. Önceki parça, duraklatma/devam etme, sonraki parça, tekrar, durdurma, favori ve otomatik oynatma kontrolleri aynı arayüzde toplandı.
+- Ses seviyesi %0-%200 aralığında ayarlanabilir hale getirildi. 10 farklı EQ ayarı, 0.5×-2× arasında 7 hız seçeneği ve kapalı dahil 5 bas seviyesi eklendi.
+- `/şarkı panel`, `/şarkı kuyruk` ve `/şarkı favoriler` altkomutları eklendi. Kuyruk için sayfalama ve karıştırma, favoriler için kullanıcı bazında kalıcı kayıt desteği eklendi.
+- Müzik ilerleme barı eklendi. Bar, her 1 dakikada bir otomatik güncellenir.
+- Yeni müzik emojilerinin farklı botlarda ilk açılışta otomatik yüklenmesi sağlandı. (Sonraki açılışlarda mevcut emojiler yeniden yüklenmez, yalnızca eksik olanlar tamamlanır.)
+
+### Değiştirildi
+
+- Embed tasarımı ve kontrol paneli, parça geçişleri ve ayar değişikliklerinde birlikte güncellenecek şekilde düzenlendi. Sona eren oturumların kontrolleri otomatik kapatılır ve otomatik güncellemeleri durdurulur.
+- YouTube ses akışı, çalışan istemciler ve HLS yedek yolu üzerinden alınacak şekilde yenilendi. Oynatma başlamadan önce kaynağın ilk ve son bölümleri doğrulanır, geçici bağlantı hataları sınırlı sayıda yeniden denenir.
+
+### Düzeltildi
+
+- Ses kaynağının HTTP 403 döndürmesine rağmen panelin 0:00 zaman damgasında "çalıyor" görünmesi düzeltildi. Yükleniyor, çalıyor ve oynatılamadı durumları birbirinden ayrıldı.
+- Başlamayan veya ilerlemeyi durduran ses akışları için zaman aşımı ve kuyruk toparlanması eklendi. Hatalı parçaların tekrar modunda sonsuz döngüye girmesi önlendi, sıradaki parça başladığında kullanıcının tekrar tercihi geri yüklenir.
+- Aynı sunucuda eşzamanlı oynatma komutlarının kuyruk ve panel oluştururken çakışması giderildi. Arama sonrasında ses kanalı ve sıra sahibi yeniden doğrulanır.
+- Bitmiş kuyruğun eski sahibinin, panelinin ve ayarlarının yeni oturuma taşınması engellendi. Önceki parçalardan geç gelen akışların yeni oynatmayı etkilemesi önlendi.
+- Ses filtresi nedeniyle yeniden başlatılan parçanın panelde "yükleniyor" durumunda kalması düzeltildi.
+
+---
+
 [v1.9.10]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.10
 [v1.9.11]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.11
 [v1.9.12]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.12
 [v1.9.13]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.13
 [v1.9.14]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.14
+[v1.9.15]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.15

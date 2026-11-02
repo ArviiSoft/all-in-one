@@ -562,7 +562,7 @@ module.exports = {
           return i.update(buildPayload(currentView));
         }
       } catch (err) {
-        console.error("[Yardım] Select menu hatası:", err);
+        console.error("🔴 [Yardım] Select menu hatası:", err);
       }
     });
 
@@ -660,7 +660,7 @@ module.exports = {
           }
         }
       } catch (err) {
-        console.error("[Yardım] Button hatası:", err);
+        console.error("🔴 [Yardım] Button hatası:", err);
       }
     });
 

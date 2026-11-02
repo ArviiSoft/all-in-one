@@ -64,7 +64,7 @@ function formatBytes(value) {
 
 function attachmentName(attachment, index) {
   const original = String(attachment.name || `dosya-${index + 1}`)
-    // eslint-disable-next-line no-control-regex -- Ek dosya adındaki yol ayraçları ve ASCII kontrol karakterleri temizlenir.
+    // eslint-disable-next-line no-control-regex
     .replace(/[\\/\u0000-\u001F\u007F]/g, "-")
     .slice(0, 82) || `dosya-${index + 1}`;
   const spoiler = original.startsWith("SPOILER_");

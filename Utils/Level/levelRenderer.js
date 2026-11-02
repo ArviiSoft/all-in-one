@@ -39,7 +39,7 @@ function boundedJob(callback) {
 }
 
 function text(value, length = 128) {
-  // eslint-disable-next-line no-control-regex -- Kart metnindeki ASCII kontrol karakterleri bilerek boşlukla değiştirilir.
+  // eslint-disable-next-line no-control-regex
   return String(value ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, length);
 }
 

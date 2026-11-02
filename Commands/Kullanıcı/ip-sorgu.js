@@ -126,7 +126,7 @@ async function optionalRequest(label, request, fallback = {}) {
   try {
     return await request();
   } catch (error) {
-    console.warn(`🟡 [IP SORGU] ${label} alınamadı:`, error?.message || error);
+    console.warn(`⚠️ [IP SORGU] ${label} alınamadı:`, error?.message || error);
     return fallback;
   }
 }
@@ -155,7 +155,7 @@ async function resolveHostname(ip) {
     return hostnames[0] || null;
   } catch (error) {
     if (!["ENODATA", "ENOTFOUND", "ENODOMAIN"].includes(error?.code)) {
-      console.warn("🟡 [IP SORGU] PTR kaydı alınamadı:", error?.code || error?.message || error);
+      console.warn("⚠️ [IP SORGU] PTR kaydı alınamadı:", error?.code || error?.message || error);
     }
     return null;
   } finally {
@@ -243,7 +243,7 @@ async function collectIpData(ip) {
   result.auxiliaryPromise = Promise.all([hostnameRequest, abuseRequest, ipinfoRequest])
     .then(([hostname, abuseData, ipinfoData]) => Object.assign(result, { hostname, abuseData, ipinfoData }))
     .catch((error) => {
-      console.warn("🟡 [IP SORGU] Yardımcı ağ verileri tamamlanamadı:", error?.message || error);
+      console.warn("⚠️ [IP SORGU] Yardımcı ağ verileri tamamlanamadı:", error?.message || error);
     })
     .finally(() => {
       result.auxiliaryReady = true;
@@ -251,7 +251,7 @@ async function collectIpData(ip) {
   result.enrichmentPromise = collectEnrichment(data)
     .then((enrichment) => Object.assign(result, enrichment))
     .catch((error) => {
-      console.warn("🟡 [IP SORGU] Ülke ve çevre verileri tamamlanamadı:", error?.message || error);
+      console.warn("⚠️ [IP SORGU] Ülke ve çevre verileri tamamlanamadı:", error?.message || error);
     })
     .finally(() => {
       result.enrichmentReady = true;
@@ -590,7 +590,7 @@ module.exports = {
             allowedMentions: { parse: [] },
           });
         } catch (error) {
-          console.warn("🟡 [IP SORGU] Ayrıntı paneli gösterilemedi:", error?.message || error);
+          console.warn("⚠️ [IP SORGU] Ayrıntı paneli gösterilemedi:", error?.message || error);
         }
       });
 

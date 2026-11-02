@@ -56,7 +56,7 @@ function createNewsThreadWorker(client, store) {
           }
           if (code === 10003 || code === 10008) {
             finish(guildId, task.messageId);
-            console.warn(`🟡 [HABER ALT BAŞLIK] Kanal/mesaj artık mevcut değil: ${task.channelId}/${task.messageId} (${code})`);
+            console.warn(`⚠️ [HABER ALT BAŞLIK] Kanal/mesaj artık mevcut değil: ${task.channelId}/${task.messageId} (${code})`);
             return;
           }
           lastError = error;

@@ -272,7 +272,7 @@ async function processQueue() {
         ? "webhook"
         : (message.author.bot ? "bot" : "kullanıcı");
       console.warn(
-        `🟡 [OTO PUBLISH - EVENT] Mesaj Discord tarafından yayınlanabilir değil, `
+        `⚠️ [OTO PUBLISH - EVENT] Mesaj Discord tarafından yayınlanabilir değil, `
         + `mesaj=${message.id} ● kaynak=${kaynakTuru} ● tür=${message.type} `
         + `● webhook=${Boolean(message.webhookId)} ● poll=${Boolean(message.poll)} `
         + `● flags=${message.flags?.bitfield ?? 0}`
@@ -631,7 +631,7 @@ function statikComponents(components = []) {
           ...(files.length > 0 && { files }),
         });
       } catch (v2Error) {
-        console.warn("🟡 [KANAL YÖNLENDİRME] Components V2 statik kopyalanamadı, metin görünümüne geçiliyor:", v2Error.message);
+        console.warn("⚠️ [KANAL YÖNLENDİRME] Components V2 statik kopyalanamadı, metin görünümüne geçiliyor:", v2Error.message);
         const yedekMetin = stripUnknownEmojis(stripSourceMentions(tumMetin), client);
         const yedekIcerik = [rolPing.trim(), yedekMetin]
           .filter(Boolean)

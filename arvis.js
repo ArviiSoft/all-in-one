@@ -10,7 +10,7 @@ try {
     acquireSingleInstance(path.join(__dirname, "Settings/pid.txt"));
     initializeDatabase({ config });
 } catch (error) {
-    console.error("🛑 [DATABASE] Bot başlatılamadı:", error.message);
+    console.error("🔴 [DATABASE] Bot başlatılamadı:", error.message);
     process.exit(1);
 }
 process.prependOnceListener("exit", () => { try { closeDatabase(); } catch {} });
@@ -27,6 +27,7 @@ const { DefaultExtractors } = require('@discord-player/extractor');
 const { SpotifyExtractor } = require('discord-player-spotify');
 const { YoutubeMusicExtractor } = require('./Utils/Media/musicService');
 const { bindDiscordPlayerVoiceHandoff } = require('./Utils/Voice/persistentVoiceConnection');
+const { bindMusicPlayerEvents } = require('./Utils/Media/musicController');
 
 const { databaseKontrolEt } = require('./Utils/Core/databaseKontrol.js');
 const { loadEvents } = require('./Handlers/Core/eventHandler');
@@ -43,6 +44,7 @@ client.userTempVoiceChannels = new Map();
 
 const player = new Player(client);
 bindDiscordPlayerVoiceHandoff(player);
+bindMusicPlayerEvents(player);
 const musicExtractorsReady = (async () => {
     const extractorsWithoutLegacySpotify = DefaultExtractors.filter(
         extractor => extractor.identifier !== 'com.discord-player.spotifyextractor'
@@ -133,6 +135,6 @@ async function startBot() {
 startBot().catch((error) => {
     setConsoleInterceptor(null);
     console.log(`\n${renderServicePanel(startupLogCapture.entries)}\n`);
-    console.error("🛑 [SİSTEM] Bot başlatılamadı:", error);
+    console.error("🔴 [SİSTEM] Bot başlatılamadı:", error);
     process.exit(1);
 });

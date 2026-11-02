@@ -476,7 +476,7 @@ module.exports = {
       panelMesaji = await createOrUpdatePanel(interaction.guild, sohbetKanali, eskiAyar);
       assertAnonymousAllowed();
     } catch (error) {
-      console.error('🕵️ [ANONİM SOHBET] Panel gönderilemedi:', error);
+      console.error('🔴 [ANONİM SOHBET] Panel gönderilemedi:', error);
       return interaction.editReply({
         content: error instanceof TypeError ? error.message : `${emojiler.uyari} **Anonim sohbet paneli gönderilemedi. Botun kanal izinlerini kontrol edin.**`,
       });

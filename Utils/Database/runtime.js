@@ -59,7 +59,7 @@ function validateRelativePath(relative) {
   }
   const segments = relative.split("/");
   const invalid = segments.some((segment) => !segment || segment === "." || segment === ".."
-    // eslint-disable-next-line no-control-regex -- Dosya yollarındaki ASCII kontrol karakterleri güvenlik için reddedilir.
+    // eslint-disable-next-line no-control-regex
     || /[<>"|?*\x00-\x1f]/.test(segment) || /[ .]$/.test(segment)
     || /^(?:con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\.|$)/i.test(segment));
   if (invalid || !/\.json$/i.test(relative) || isIgnored(relative) || path.posix.isAbsolute(relative)) {

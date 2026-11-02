@@ -404,7 +404,7 @@ function schedulePollFinish(client, messageId, delay) {
   const timer = setTimeout(() => {
     pollTimers.delete(messageId);
     finishPoll(client, messageId).catch((error) => {
-      console.error('[OY YARIŞMASI] Yarışma sonlandırılamadı:', error);
+      console.error('🔴 [OY YARIŞMASI] Yarışma sonlandırılamadı:', error);
       schedulePollFinish(client, messageId, 60000);
     });
   }, Math.min(Math.max(delay, 0), MAX_TIMEOUT));

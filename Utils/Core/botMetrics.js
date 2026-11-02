@@ -81,14 +81,14 @@ function measureCpu(timeout = 2_500) {
     try {
       cpuStat.usagePercent((error, percent) => {
         if (error || !Number.isFinite(percent)) {
-          if (error) console.warn("🟡 [BOT BİLGİ] CPU kullanımı ölçülemedi:", error.message || error);
+          if (error) console.warn("⚠️ [BOT BİLGİ] CPU kullanımı ölçülemedi:", error.message || error);
           return finish(null);
         }
 
         finish(percent);
       });
     } catch (error) {
-      console.warn("🟡 [BOT BİLGİ] CPU kullanımı ölçülemedi:", error.message || error);
+      console.warn("⚠️ [BOT BİLGİ] CPU kullanımı ölçülemedi:", error.message || error);
       finish(null);
     }
   });

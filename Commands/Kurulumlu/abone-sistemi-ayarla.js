@@ -787,7 +787,7 @@ async function executePanel(interaction, client) {
       }
     } catch (error) {
       if ([10062, 40060, 10008, 10015].includes(Number(error.code))) {
-        console.warn('[ABONE YÖNETİM PANELİ] Etkileşim artık yanıtlanamıyor; paneli yeniden açın. Kod:', error.code);
+        console.warn('⚠️ [ABONE YÖNETİM PANELİ] Etkileşim artık yanıtlanamıyor; paneli yeniden açın. Kod:', error.code);
         return;
       }
       console.error("🔴 [ABONE YÖNETİM PANELİ]", error.message);

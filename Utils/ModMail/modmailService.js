@@ -105,7 +105,7 @@ async function pinSessionHeader(guild, channel, session, header) {
     if (!header.pinned) await header.pin('ModMail talep yönetim mesajı');
     store.updateSession(guild.id, session.channelId, draft => { draft.headerPinned = true; });
   } catch (error) {
-    if (![10003, 10008].includes(Number(error.code))) console.warn('[MODMAIL] Talep yönetim mesajı sabitlenemedi:', errorDetails(error));
+    if (![10003, 10008].includes(Number(error.code))) console.warn('⚠️ [MODMAIL] Talep yönetim mesajı sabitlenemedi:', errorDetails(error));
   }
 }
 async function refreshOpenSessions(client) {

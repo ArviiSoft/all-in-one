@@ -1,5 +1,4 @@
 const { Events, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, StringSelectMenuBuilder, MessageFlags  } = require('discord.js');
-const { useMainPlayer } = require('discord-player');
 
 const fs = require('../../Utils/Core/databaseFs');
 const path = require("path");
@@ -468,113 +467,16 @@ client.on('interactionCreate', async (interaction) => {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//MÜZİK SİSTEMİ BUTONLARI
-const { buildMusicContainer, buildNoticeContainer } = require('../../Commands/Eğlence/şarkı.js');
-
-function musicButtonNotice(title, description, color = 0xfee75c) {
-  return {
-    components: [buildNoticeContainer(title, description, color)],
-    flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
-  };
-}
-
-async function waitForNextMusicTrack(queue, previousTrackId) {
-  for (let attempt = 0; attempt < 10; attempt++) {
-    if (!queue.currentTrack || queue.currentTrack.id !== previousTrackId) return queue.currentTrack;
-    await new Promise(resolve => setTimeout(resolve, 120));
-  }
-  return queue.currentTrack;
-}
-
-client.on('interactionCreate', async (interaction) => {
-    if (isHoneypotBlocked(interaction)) return;
-
-    if (!interaction.isButton() || !interaction.customId.startsWith('safir_mzk_')) return;
-
-    const player = useMainPlayer();
-    const queue = player.nodes.get(interaction.guildId);
-
-    if (!queue?.currentTrack) {
-      return interaction.reply(musicButtonNotice(
-        '🎵 Oynatma Bulunamadı',
-        'Şu anda kontrol edilebilecek bir şarkı yok.'
-      ));
-    }
-
-    const requestedBy = queue.metadata?.requestedBy;
-    if (requestedBy?.id && interaction.user.id !== requestedBy.id) {
-      return interaction.reply(musicButtonNotice(
-        '🔒 Kontrol Yetkisi Yok',
-        `Bu oynatma panelini yalnızca sırayı başlatan <@${requestedBy.id}> kullanabilir.`
-      ));
-    }
-
-    try {
-      switch (interaction.customId) {
-        case 'safir_mzk_durdur':
-            if (queue.node.isPaused()) {
-              return interaction.reply(musicButtonNotice(
-                '⏸️ Zaten Duraklatıldı',
-                'Şarkı zaten duraklatılmış durumda.'
-              ));
-            }
-            queue.node.pause();
-            return interaction.update({
-                components: [buildMusicContainer(queue.currentTrack, 'duraklatildi', queue)],
-            });
-        case 'safir_mzk_devam':
-            if (!queue.node.isPaused()) {
-              return interaction.reply(musicButtonNotice(
-                '▶️ Oynatma Zaten Aktif',
-                'Şarkı şu anda çalmaya devam ediyor.'
-              ));
-            }
-            queue.node.resume();
-            return interaction.update({
-                components: [buildMusicContainer(queue.currentTrack, 'caliyor', queue)],
-            });
-        case 'safir_mzk_gec': {
-            const previousTrack = queue.currentTrack;
-            await interaction.deferUpdate();
-            const skipped = queue.node.skip();
-
-            if (!skipped) {
-              return interaction.followUp(musicButtonNotice(
-                '⏭️ Sırada Şarkı Yok',
-                'Geçilebilecek başka bir şarkı bulunmuyor.'
-              ));
-            }
-
-            const nextTrack = await waitForNextMusicTrack(queue, previousTrack.id);
-            return interaction.editReply({
-              components: [nextTrack
-                ? buildMusicContainer(nextTrack, 'caliyor', queue)
-                : buildMusicContainer(previousTrack, 'bitti', null)],
-            });
-        }
-        case 'safir_mzk_bitir': {
-            const currentTrack = queue.currentTrack;
-            await interaction.update({
-              components: [buildMusicContainer(currentTrack, 'bitti', null)],
-            });
-            queue.delete();
-            return;
-        }
-      }
-    } catch (error) {
-      console.error('🔴 [MÜZİK] Oynatma butonu hatası:', error);
-      const payload = musicButtonNotice(
-        '⚠️ Kontrol Uygulanamadı',
-        'Müzik kontrolü uygulanırken beklenmeyen bir hata oluştu.',
-        0xed4245
-      );
-      if (interaction.replied || interaction.deferred) return interaction.followUp(payload).catch(() => null);
-      return interaction.reply(payload).catch(() => null);
-    }
+//MÜZİK BUTONLARI VE EFEKT MENÜLERİ
+const { handleMusicInteraction } = require('../../Utils/Media/musicController');
+client.on('interactionCreate', async interaction => {
+  if (isHoneypotBlocked(interaction)) return;
+  if ((!interaction.isButton() && !interaction.isStringSelectMenu()) || !interaction.customId.startsWith('safir_mzk_')) return;
+  await handleMusicInteraction(interaction).catch(error => console.error('[MÜZİK] Etkileşim hatası:', error.message));
 });
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
 //SELAM VER BUTON
 client.on('interactionCreate', async (interaction) => {
   if (isHoneypotBlocked(interaction)) return;

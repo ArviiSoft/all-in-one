@@ -167,7 +167,7 @@ async function resolveSafely(label, resolver) {
     return await resolver();
   } catch (error) {
     if (!["ENODATA", "ENOTFOUND", "ENODOMAIN", "ESERVFAIL", "EREFUSED"].includes(error?.code)) {
-      console.warn(`🟡 [DOMAIN SORGU] ${label} kaydı alınamadı:`, error?.code || error?.message || error);
+      console.warn(`⚠️ [DOMAIN SORGU] ${label} kaydı alınamadı:`, error?.code || error?.message || error);
     }
     return null;
   }
@@ -577,7 +577,7 @@ module.exports = {
         ip
           ? fetchJson(`https://ipwho.is/${encodeURIComponent(ip)}`)
             .catch((error) => {
-              console.warn("🟡 [DOMAIN SORGU] IP konumu alınamadı:", error?.message || error);
+              console.warn("⚠️ [DOMAIN SORGU] IP konumu alınamadı:", error?.message || error);
               return {};
             })
           : {},
@@ -585,7 +585,7 @@ module.exports = {
           ? fetchJson(`https://api.api-ninjas.com/v1/whois?domain=${encodeURIComponent(domain)}`, {
             headers: { "X-Api-Key": API_NINJAS_KEY },
           }).catch((error) => {
-            console.warn("🟡 [DOMAIN SORGU] WHOIS bilgisi alınamadı:", error?.message || error);
+            console.warn("⚠️ [DOMAIN SORGU] WHOIS bilgisi alınamadı:", error?.message || error);
             return {};
           })
           : {},

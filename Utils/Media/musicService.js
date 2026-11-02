@@ -1,6 +1,8 @@
-const { Readable } = require("node:stream");
+const { randomUUID } = require("node:crypto");
 const { BaseExtractor, Playlist, QueryType, Track, Util } = require("discord-player");
 const play = require("play-dl");
+const { boundedFetch, openYoutubeAudio } = require("./youtubeAudioStream");
+const { beginMusicStream, observeMusicSource } = require("./musicPlayback");
 
 const DEFAULT_PLATFORM = "spotify";
 
@@ -114,7 +116,7 @@ class YoutubeMusicExtractor extends BaseExtractor {
   async activate() {
     const { Innertube, Log: YoutubeLog } = await import("youtubei.js");
     YoutubeLog.setLevel(YoutubeLog.Level.ERROR);
-    this.innertube = await Innertube.create({ retrieve_player: false });
+    this.innertube = await Innertube.create({ retrieve_player: false, fetch: boundedFetch });
     this.protocols = ["yt", "youtube", "ytmusic"];
   }
 
@@ -163,7 +165,7 @@ class YoutubeMusicExtractor extends BaseExtractor {
     if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId || "")) {
       throw new MusicSearchError("INVALID_YOUTUBE_URL", "Geçerli bir YouTube video kimliği bulunamadı.");
     }
-    const info = await this.innertube.getBasicInfo(videoId, { client: "ANDROID_VR" });
+    const info = await this.innertube.getBasicInfo(videoId, { client: "VISIONOS" });
     return this.buildTrack(info, requestedBy);
   }
 
@@ -209,6 +211,31 @@ class YoutubeMusicExtractor extends BaseExtractor {
 
   async stream(track) {
     return createYoutubeAudioStream(track, this);
+  }
+
+  async getRelatedTracks(track, history) {
+    const source = track.raw?.musicPlaybackTrack || track.bridgedTrack || track;
+    const videoId = parseYoutubeURL(source.url)?.videoId;
+    const seen = new Set([source, track, ...(history?.tracks?.toArray?.() || [])]
+      .map(item => parseYoutubeURL((item.raw?.musicPlaybackTrack || item).url)?.videoId || item.url));
+    let tracks = [];
+    if (videoId) {
+      try {
+        const next = await this.innertube.music.getUpNext(videoId, true);
+        tracks = Array.from(next.contents || []).filter(item => item.video_id && !seen.has(item.video_id))
+          .map(item => this.buildTrack({
+            id: item.video_id, title: item.title,
+            author: { name: item.artists?.map(artist => artist.name).join(", ") || item.author },
+            thumbnails: item.thumbnail, duration: item.duration,
+          }, track.requestedBy));
+      } catch {
+      }
+    }
+    if (!tracks.length) {
+      tracks = await searchYoutubeMusic(this.context.player, track.author, track.requestedBy, 15);
+    }
+    return this.createResponse(null, tracks.filter(item => !seen.has(parseYoutubeURL(item.url)?.videoId || item.url)
+      && (!item.durationMS || item.durationMS >= 60_000)));
   }
 }
 
@@ -590,7 +617,7 @@ async function searchLink(player, url, requestedBy) {
   }
 }
 
-async function resolveBridgedStream(player, track) {
+async function resolveBridgedStream(player, track, options = {}) {
   const platformKey = inferPlatformKey(track);
   if (!["spotify", "apple_music", "deezer"].includes(platformKey)) return null;
 
@@ -616,7 +643,8 @@ async function resolveBridgedStream(player, track) {
 
   track.bridgedTrack = playbackTrack;
   track.bridgedExtractor = extractor;
-  return extractor.stream(playbackTrack);
+  options.signal?.throwIfAborted();
+  return createYoutubeAudioStream(playbackTrack, extractor, options);
 }
 
 function getYoutubeVideoId(url) {
@@ -628,60 +656,30 @@ function getYoutubeVideoId(url) {
   return id;
 }
 
-async function createRangedYoutubeStream(innertube, url, contentLength, cpn) {
-  const { Constants, Utils: YoutubeUtils } = await import("youtubei.js");
-  const rangeSize = 1_024 * 1_024;
-  let abortController = null;
-
-  const stream = Readable.from((async function* readRanges() {
-    for (let start = 0; start < contentLength; start += rangeSize) {
-      const end = Math.min(contentLength - 1, start + rangeSize - 1);
-      abortController = new AbortController();
-      const separator = url.includes("?") ? "&" : "?";
-      const rangedURL = `${url}${separator}cpn=${encodeURIComponent(cpn || "")}&range=${start}-${end}`;
-      const response = await innertube.session.http.fetch_function(rangedURL, {
-        headers: Constants.STREAM_HEADERS,
-        signal: abortController.signal,
-      });
-
-      if (!response.ok || !response.body) {
-        throw new Error(`YouTube ses aralığı alınamadı: HTTP ${response.status}`);
-      }
-
-      for await (const chunk of YoutubeUtils.streamToIterable(response.body)) {
-        yield Buffer.from(chunk);
-      }
-    }
-  })(), { highWaterMark: 512 * 1_024 });
-
-  stream.once("close", () => abortController?.abort());
-  return stream;
-}
-
-async function createYoutubeAudioStream(track, extractor) {
-  const innertube = extractor?.innertube;
-  if (!innertube) {
+async function createYoutubeAudioStream(track, extractor, options = {}) {
+  if (!extractor?.innertube) {
     throw new MusicSearchError("YOUTUBE_UNAVAILABLE", "YouTube Music oynatma kaynağı hazır değil.");
   }
-
-  const videoId = getYoutubeVideoId(track.url);
-  const info = await innertube.getBasicInfo(videoId, { client: "ANDROID_VR" });
-  const format = info.chooseFormat({ format: "any", quality: "best", type: "audio" });
-  const contentLength = Number(format?.content_length) || 0;
-
-  if (!format?.url || contentLength <= 0) {
-    throw new MusicSearchError(
-      "YOUTUBE_STREAM_UNAVAILABLE",
-      "Eşleşen YouTube Music parçası için doğrudan ses akışı alınamadı."
-    );
+  try {
+    const { stream, client, itag, transport } = await openYoutubeAudio(extractor.innertube, getYoutubeVideoId(track.url), options);
+    track.raw ||= {};
+    track.raw.musicAudioClient = client;
+    track.raw.musicAudioItag = itag;
+    track.raw.musicAudioTransport = transport;
+    return stream;
+  } catch (error) {
+    throw new MusicSearchError(error.code || "YOUTUBE_STREAM_UNAVAILABLE", error.message, error);
   }
-
-  return createRangedYoutubeStream(innertube, format.url, contentLength, info.cpn);
 }
 
 function createMusicNodeOptions(channel, requestedBy, player) {
   return {
-    metadata: { channel, requestedBy },
+    metadata: { channel, requestedBy, musicSession: randomUUID(), musicSettings: { speed: 1, eq: "flat", bass: "off" } },
+    volume: 100,
+    disableVolume: false,
+    disableEqualizer: false,
+    disableResampler: false,
+    resampler: 48_000,
     leaveOnEmpty: true,
     leaveOnEmptyCooldown: 30_000,
     leaveOnEnd: true,
@@ -689,7 +687,14 @@ function createMusicNodeOptions(channel, requestedBy, player) {
     leaveOnStop: true,
     leaveOnStopCooldown: 5_000,
     preferBridgedMetadata: false,
-    onBeforeCreateStream: track => resolveBridgedStream(player, track),
+    async onBeforeCreateStream(track, queryType, queue) {
+      const signal = beginMusicStream(queue, track);
+      const stream = inferPlatformKey(track) === "youtube_music"
+        ? await createYoutubeAudioStream(track, getYoutubeExtractor(player), { signal })
+        : await resolveBridgedStream(player, track, { signal });
+      return observeMusicSource(queue, track, stream, signal);
+    },
+    onStreamExtracted: (stream, track, queue) => observeMusicSource(queue, track, stream),
   };
 }
 

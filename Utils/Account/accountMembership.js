@@ -111,7 +111,7 @@ async function getMembershipDetails(guild, member) {
     try {
       messages = getAccountMessageStats(guild, member.id, db.loadData());
     } catch (error) {
-      console.warn("🟡 [HESAP BİLGİ] Mesaj istatistikleri okunamadı:", error?.message || error);
+      console.warn("⚠️ [HESAP BİLGİ] Mesaj istatistikleri okunamadı:", error?.message || error);
     }
   }
   return { roles, joinedTimestamp: joinedTimestamp(member), joinPosition, joinMethod, messages };

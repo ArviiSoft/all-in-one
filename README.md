@@ -7,7 +7,7 @@
 Moderasyon, otomasyon, topluluk araçları, müzik ve web yönetim paneli.<br>
 **arviis.** tarafından geliştirilen, kendi ortamınızda çalıştırabileceğiniz çok amaçlı Discord botu.
 
-![Sürüm](https://img.shields.io/badge/sürüm-1.9.14-8b5cf6?style=for-the-badge)
+![Sürüm](https://img.shields.io/badge/sürüm-1.9.15-8b5cf6?style=for-the-badge)
 ![Discord.js](https://img.shields.io/badge/discord.js-v14-5865F2?style=for-the-badge&logo=discord&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-22.13%2B_%2822.x%29-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
 ![Lisans](https://img.shields.io/badge/lisans-GPL--3.0--only-64748b?style=for-the-badge)
@@ -451,7 +451,7 @@ Hazır PM2 yapılandırması **tek süreç**, `fork` modu, otomatik yeniden baş
 > [!IMPORTANT]
 > Aynı proje klasörünü terminal, BAT ve PM2 ile eşzamanlı çalıştırmayın. `Settings/pid.txt` ve başlangıç kilidi ikinci süreci engeller. Kilit hatasında önce çalışan süreci kontrol edin, aktif sürecin kilidini silmeyin.
 
-Başlangıç panelleri olay/komut yükleme sonuçlarını ve etkinse Dashboard durumunu gösterir. Veritabanı veya etkin Dashboard'un yapılandırılması başarısız olursa açılış hata ile sonlanabilir, hata satırındaki eksik ayarı düzeltin. 
+Başlangıç panelleri olay/komut yükleme sonuçlarını ve etkinse Dashboard durumunu gösterir. Veritabanı veya etkin Dashboard'un yapılandırılması başarısız olursa açılış hata ile sonlanabilir, hata satırındaki eksik ayarı düzeltin.
 
 <a id="gelistirme"></a>
 

@@ -329,7 +329,7 @@ function createPanelController(store) {
       if (['home', 'refresh', 'rewards', 'rewards-prev', 'rewards-next'].includes(action)) return refresh();
       throw new Error('Bu panel işlemi artık kullanılamıyor. `/seviye-sistemi` ile paneli yeniden aç.');
     } catch (error) {
-      console.error('[LEVEL] Yönetim paneli işlemi uygulanamadı:', error.message);
+      console.error('🔴 [LEVEL] Yönetim paneli işlemi uygulanamadı:', error.message);
       const message = error.message || 'İşlem tamamlanamadı. Biraz sonra tekrar dene.';
       if (interaction.deferred || interaction.replied) return refresh(`⚠️ ${message}`);
       return fail(`⚠️ ${message}`);

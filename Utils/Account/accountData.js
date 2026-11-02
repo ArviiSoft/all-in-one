@@ -13,7 +13,7 @@ async function getLastSeenAt(userId) {
     const timestamp = data?.[userId]?.SonGorulme;
     return Number.isFinite(timestamp) && timestamp > 0 && Number.isFinite(new Date(timestamp).getTime()) ? timestamp : null;
   } catch (error) {
-    if (error?.code !== "ENOENT") console.warn("🟡 [HESAP BİLGİ] Son görülme zamanı okunamadı:", error?.message || error);
+    if (error?.code !== "ENOENT") console.warn("⚠️ [HESAP BİLGİ] Son görülme zamanı okunamadı:", error?.message || error);
     return null;
   }
 }
