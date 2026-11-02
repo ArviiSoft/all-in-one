@@ -1,4 +1,5 @@
 const { QueueRepeatMode } = require("discord-player");
+const { formatAudioError } = require("./youtubeAudioStream");
 
 const START_TIMEOUT_MS = 45_000;
 const STALL_TIMEOUT_MS = 30_000;
@@ -37,7 +38,7 @@ function failPlayback(queue, error, track, libraryWillSkip = false) {
   attempt.repeatMode ??= queue.repeatMode;
   queue.setRepeatMode(QueueRepeatMode.OFF);
   attempt.controller.abort();
-  console.warn(`⚠️ [MÜZİK] Ses akışı başarısız (${queue.id}, ${error?.code || error?.name || "STREAM_ERROR"}).`);
+  console.warn(`[MÜZİK] Ses akışı başarısız (${queue.id}): ${formatAudioError(error)}`);
   notify(queue);
   if (libraryWillSkip) return;
   if (!queue.node.skip()) {
@@ -114,8 +115,8 @@ function bindMusicPlayback(player) {
   player.events.on("playerTrigger", (queue, track, reason) => {
     if (reason === "filters") started(queue, track);
   });
-  player.events.on("playerSkip", (queue, track, reason) => {
-    if (reason === "ERR_NO_STREAM") failPlayback(queue, { code: reason }, track, true);
+  player.events.on("playerSkip", (queue, track, reason, description) => {
+    if (reason === "ERR_NO_STREAM") failPlayback(queue, { code: reason, message: description }, track, true);
   });
   for (const event of ["error", "playerError"]) {
     player.events.on(event, (queue, error, track) => failPlayback(queue, error, track));

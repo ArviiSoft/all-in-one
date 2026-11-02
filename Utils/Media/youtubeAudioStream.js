@@ -13,6 +13,19 @@ class AudioSourceError extends Error {
   }
 }
 
+function formatAudioError(error) {
+  const parts = [];
+  const seen = new Set();
+  for (let current = error; current && !seen.has(current) && parts.length < 4; current = current.cause) {
+    seen.add(current);
+    const detail = [current.message || (typeof current === "string" ? current : ""),
+      current.info?.status, current.info?.reason].filter(Boolean).join("; ");
+    parts.push(`${current.code || current.name || "Error"}: ${detail}`);
+  }
+  return parts.join(" <- ").replace(/https?:\/\/[^\s"'<>]+/gi, "[URL]")
+    .replace(/\r?\n\s+at\s[^\r\n]*/g, "").replace(/[\r\n\t]+/g, " ").slice(0, 1800);
+}
+
 function boundedFetch(url, init = {}) {
   return fetch(url, {
     ...init,
@@ -155,15 +168,21 @@ async function openYoutubeAudio(innertube, videoId, { signal, clients = AUDIO_CL
   const failures = [];
   for (const client of clients) {
     signal?.throwIfAborted();
+    let stage = "player", directError;
     try {
       const info = await innertube.getBasicInfo(videoId, { client });
       signal?.throwIfAborted();
+      if (!info.streaming_data && info.playability_status?.status && info.playability_status.status !== "OK") {
+        throw new AudioSourceError(`YOUTUBE_${info.playability_status.status}`,
+          info.playability_status.reason || "YouTube bu parçanın oynatılmasına izin vermedi.");
+      }
       const options = {
         ...streamOptions,
         fetcher: innertube.session.http.fetch_function, signal,
         headers: { ...Constants.STREAM_HEADERS, "user-agent": Constants.CLIENTS[client].USER_AGENT },
       };
       try {
+        stage = "direct";
         const formats = (info.streaming_data?.adaptive_formats || []).filter(format =>
           format.has_audio && !format.has_video && format.url && Number(format.content_length) > 0);
         if (!formats.length) throw new AudioSourceError("NO_AUDIO_URL", "Kullanılabilir bir ses bağlantısı bulunamadı.");
@@ -172,16 +191,21 @@ async function openYoutubeAudio(innertube, videoId, { signal, clients = AUDIO_CL
         return { stream, client, itag: format.itag, transport: "direct" };
       } catch (error) {
         if (signal?.aborted || !info.streaming_data?.hls_manifest_url) throw error;
+        directError = error;
+        stage = "hls";
         const stream = await createHlsStream({ ...options, url: info.streaming_data.hls_manifest_url });
         return { stream, client, itag: null, transport: "hls" };
       }
     } catch (error) {
       if (signal?.aborted) throw signal.reason;
-      failures.push(`${client}: ${error.code || error.name}`);
+      failures.push({ client, stage, error, directError });
     }
   }
+  const summary = failures.map(({ client, error }) => `${client}: ${error.code || error.name}`).join(", ");
+  const details = failures.map(({ client, stage, error, directError }) =>
+    `${client}/${stage}: ${formatAudioError(error)}${directError ? `; direct: ${formatAudioError(directError)}` : ""}`).join(" | ");
   throw new AudioSourceError("YOUTUBE_STREAM_UNAVAILABLE",
-    `YouTube ses kaynağına ulaşılamadı (${failures.join(", ")}). Lütfen daha sonra tekrar dene veya başka platform seç.`);
+    `YouTube ses kaynağına ulaşılamadı (${summary}). ${details}`);
 }
 
-module.exports = { AUDIO_CLIENTS, REQUEST_TIMEOUT_MS, AudioSourceError, boundedFetch, createRangedStream, createHlsStream, openYoutubeAudio };
+module.exports = { AUDIO_CLIENTS, REQUEST_TIMEOUT_MS, AudioSourceError, formatAudioError, boundedFetch, createRangedStream, createHlsStream, openYoutubeAudio };

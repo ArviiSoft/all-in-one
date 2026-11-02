@@ -29,7 +29,7 @@ function stopTimer(session) {
 }
 
 function logError(error) {
-  console.warn(`⚠️ [MÜZİK] Panel güncellenemedi: ${error?.code || error?.message || "Bilinmeyen hata"}`);
+  console.warn(`[MÜZİK] Panel güncellenemedi: ${error?.code || error?.message || "Bilinmeyen hata"}`);
 }
 
 function startTimer(queue, session) {
@@ -219,7 +219,7 @@ async function handleMusicInteraction(interaction, player = useMainPlayer()) {
       await refreshMusicMessages(queue);
     } finally { session.busy = false; }
   } catch (error) {
-    console.error("🔴 [MÜZİK] Kontrol uygulanamadı:", error.message);
+    console.error("[MÜZİK] Kontrol uygulanamadı:", error.message);
     const response = noticePayload("Kontrol uygulanamadı", error.message || "Lütfen yeniden dene.", 0xed4245, true);
     if (interaction.replied || interaction.deferred) await interaction.followUp(response).catch(() => null);
     else await interaction.reply(response).catch(() => null);

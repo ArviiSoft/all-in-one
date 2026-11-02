@@ -13,7 +13,7 @@ async function ensureMusicEmojis(client, fetched) {
       fetched.set(emoji.id, emoji);
       existingNames.add(name);
     } catch (error) {
-      console.warn(`⚠️ [MÜZİK] ${name} emojisi yüklenemedi: ${error.code || error.name}. Metin çubuğu kullanılacak.`);
+      console.warn(`[MÜZİK] ${name} emojisi yüklenemedi: ${error.code || error.name}. Metin çubuğu kullanılacak.`);
     }
   }
   return fetched;
