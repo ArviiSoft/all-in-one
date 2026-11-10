@@ -284,7 +284,7 @@ module.exports = {
                 label: `Tüm Komutlar (${allCommands.length})`,
                 value: "__all__",
                 description: "Ana yardım ekranını görüntüle.",
-                emoji: emojiler.kategori,
+                emoji: emojiler.kategori || "📚",
               },
               ...categories.map((category) => ({
                 label: `${formatString(category.directory)} (${category.commands.length})`,
@@ -315,14 +315,14 @@ module.exports = {
                     `${group.commands.length} komuttan oluşan sistemi görüntüle.`,
                     100
                   ),
-                  emoji: group.emoji,
+                  emoji: group.emoji || "⚙️",
                 }))
               : [
                   {
                     label: "Sistem bulunamadı",
                     value: "__none__",
                     description: "Aktif sistem komutu bulunamadı.",
-                    emoji: emojiler.uyari,
+                    emoji: emojiler.uyari || "⚠️",
                   },
                 ]
           )
@@ -562,7 +562,7 @@ module.exports = {
           return i.update(buildPayload(currentView));
         }
       } catch (err) {
-        console.error("🔴 [Yardım] Select menu hatası:", err);
+        console.error("[Yardım] Select menu hatası:", err);
       }
     });
 
@@ -660,7 +660,7 @@ module.exports = {
           }
         }
       } catch (err) {
-        console.error("🔴 [Yardım] Button hatası:", err);
+        console.error("[Yardım] Button hatası:", err);
       }
     });
 

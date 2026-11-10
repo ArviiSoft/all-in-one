@@ -7,7 +7,7 @@
 Moderasyon, otomasyon, topluluk araçları, müzik ve web yönetim paneli.<br>
 **arviis.** tarafından geliştirilen, kendi ortamınızda çalıştırabileceğiniz çok amaçlı Discord botu.
 
-![Sürüm](https://img.shields.io/badge/sürüm-1.9.15-8b5cf6?style=for-the-badge)
+![Sürüm](https://img.shields.io/badge/sürüm-1.9.16-8b5cf6?style=for-the-badge)
 ![Discord.js](https://img.shields.io/badge/discord.js-v14-5865F2?style=for-the-badge&logo=discord&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-22.13%2B_%2822.x%29-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
 ![Lisans](https://img.shields.io/badge/lisans-GPL--3.0--only-64748b?style=for-the-badge)
@@ -113,7 +113,7 @@ flowchart TD
     H --> J["MongoDB"]
 ```
 
-Açılışta ortam ayarları okunur, aynı klasörde ikinci bir süreç çalışmasını engelleyen kilit alınır ve veritabanı hazırlanır. Discord bağlantısının ardından uygulama emojileri alınır, slash komutları kaydedilir ve zamanlanmış işler başlatılır. Dashboard etkinse aynı Node.js sürecinde çalışır, ayrı bir frontend derleme adımı yoktur.
+Açılışta ortam ayarları okunur, aynı klasörde ikinci bir süreç çalışmasını engelleyen kilit alınır ve veritabanı hazırlanır. Discord bağlantısının ardından genel, müzik, hesap ve boost emojilerinin tamamı kontrol edilir, yalnızca eksik olanlar paketle gelen görsellerden yüklenir. Mevcut emojiler eski ad biçimleriyle de tanınır ve tekrar yüklenmez. Ardından slash komutları kaydedilir ve zamanlanmış işler başlatılır. Dashboard etkinse aynı Node.js sürecinde çalışır, ayrı bir frontend derleme adımı yoktur.
 
 > [!IMPORTANT]
 > Bazı ayarlar bot genelindedir. Örneğin bot durumu, bot sahibi, olay filtreleri ve bot ZIP yedekleme planı tüm kurulumu etkiler. Paneldeki kapsam ve açıklamaları kontrol ederek kaydedin.
@@ -478,7 +478,7 @@ Yeni komut eklerken mevcut kategori düzenini ve `SlashCommandBuilder` yapısın
 | **Disallowed intents hatası** | Discord bot ayarlarındaki ayrıcalıklı intent izinlerini, gerekiyorsa onay durumunu kontrol edin. |
 | **Slash komutları görünmüyor** | Botun doğru uygulama ile eklendiğini, `applications.commands` kapsamını ve başlangıçtaki komut senkronizasyon sonucunu kontrol edin. |
 | **Rol veya moderasyon işlemi başarısız** | Hem kullanıcının hem botun izinlerini, kanal izinlerini ve rol hiyerarşisini kontrol edin. |
-| **Komut yüklendi, bazı emojiler eksik** | Uygulama emojileri açılışta Discord'dan alınır. Kendi uygulamanızdaki emoji adlarını `Utils/Emojis/emojiler.js` eşlemeleriyle karşılaştırın. |
+| **Komut yüklendi, bazı emojiler eksik** | Eksik uygulama emojileri açılışta otomatik tamamlanır. Konsoldaki `[EMOJİ]` hatasını ve uygulamanın emoji kapasitesini kontrol edin, başarısız olanlar sonraki açılışta yeniden denenir. Genel ve müzik emojileri koda gömülüdür, ayrıca PNG/GIF klasörü kopyalamak gerekmez. |
 | **Panel açılmıyor** | `DASHBOARD_ENABLED=true`, gerekli giriş ayarları, portun boş olması ve botun açılışını tamamlaması gerekir. Local paneli botun çalıştığı cihazda açın. |
 | **Panel “HTTPS bağlantısı gerektirir” diyor** | Ters vekilin HTTPS'i sonlandırdığını, `X-Forwarded-Proto` bilgisini ilettiğini ve loopback üzerinden bağlandığını kontrol edin. |
 | **“İstek adresine izin verilmiyor”** | Public modda URL/Host eşleşmesini, local modda gerekiyorsa `DASHBOARD_ALLOWED_HOSTS` alanını kontrol edin. |

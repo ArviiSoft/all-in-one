@@ -1,0 +1,502 @@
+[
+  {
+    "alias": "tik",
+    "name": "tik_arviis"
+  },
+  {
+    "alias": "ampul",
+    "name": "ampul_arviis"
+  },
+  {
+    "alias": "donendev",
+    "name": "donen_dev_arviis"
+  },
+  {
+    "alias": "bulut",
+    "name": "bulut_arviis"
+  },
+  {
+    "alias": "online",
+    "name": "online_arviis"
+  },
+  {
+    "alias": "idle",
+    "name": "idle_arviis"
+  },
+  {
+    "alias": "dnd",
+    "name": "dnd_arviis"
+  },
+  {
+    "alias": "offline",
+    "name": "offline_arviis"
+  },
+  {
+    "alias": "carpi",
+    "name": "carpi_arviis"
+  },
+  {
+    "alias": "flying_nitro_boost",
+    "name": "flying_nitro_boost_arviis"
+  },
+  {
+    "alias": "yukleniyor",
+    "name": "yukleniyor_arviis"
+  },
+  {
+    "alias": "lgbt",
+    "name": "lgbt_arviis"
+  },
+  {
+    "alias": "uye",
+    "name": "uye_arviis"
+  },
+  {
+    "alias": "kullanici",
+    "name": "kullanici_arviis"
+  },
+  {
+    "alias": "mdeveloper",
+    "name": "mdeveloper_arviis"
+  },
+  {
+    "alias": "hashtag",
+    "name": "hashtag_arviis"
+  },
+  {
+    "alias": "konfeti",
+    "name": "konfeti_arviis"
+  },
+  {
+    "alias": "saat",
+    "name": "saat_arviis"
+  },
+  {
+    "alias": "info",
+    "name": "info_arviis"
+  },
+  {
+    "alias": "nitroboost",
+    "name": "nitroboost_arviis"
+  },
+  {
+    "alias": "discord",
+    "name": "discord_arviis"
+  },
+  {
+    "alias": "bildirim",
+    "name": "bildirim_arviis"
+  },
+  {
+    "alias": "buyutec",
+    "name": "buyutec_arviis"
+  },
+  {
+    "alias": "bot",
+    "name": "bot_arviis"
+  },
+  {
+    "alias": "doviz",
+    "name": "doviz_arviis"
+  },
+  {
+    "alias": "laugh",
+    "name": "laugh_arviis"
+  },
+  {
+    "alias": "ayar",
+    "name": "ayar_arviis"
+  },
+  {
+    "alias": "ban",
+    "name": "ban_arviis"
+  },
+  {
+    "alias": "fourdkalp",
+    "name": "4dkalp_arviis"
+  },
+  {
+    "alias": "asagiok",
+    "name": "asagiok_arviis"
+  },
+  {
+    "alias": "pikachuselam",
+    "name": "pikachuselam_arviis"
+  },
+  {
+    "alias": "dikkat",
+    "name": "dikkat_arviis"
+  },
+  {
+    "alias": "uzgunpanda",
+    "name": "uzgunpanda_arviis"
+  },
+  {
+    "alias": "sadesagok",
+    "name": "sadesagok_arviis"
+  },
+  {
+    "alias": "giveaway",
+    "name": "giveaway_arviis"
+  },
+  {
+    "alias": "instagram2",
+    "name": "instagram2_arviis"
+  },
+  {
+    "alias": "mutlupanda",
+    "name": "mutlupanda_arviis"
+  },
+  {
+    "alias": "kertenkelehehe",
+    "name": "kertenkelehehe_arviis"
+  },
+  {
+    "alias": "kalpanda",
+    "name": "kalpanda_arviis"
+  },
+  {
+    "alias": "alt",
+    "name": "alt_arviis"
+  },
+  {
+    "alias": "koc",
+    "name": "aries_arviis"
+  },
+  {
+    "alias": "boga",
+    "name": "taurus_arviis"
+  },
+  {
+    "alias": "ikizler",
+    "name": "gemini_arviis"
+  },
+  {
+    "alias": "yengec",
+    "name": "cancer_arviis"
+  },
+  {
+    "alias": "aslan",
+    "name": "leo_arviis"
+  },
+  {
+    "alias": "basak",
+    "name": "virgo_arviis"
+  },
+  {
+    "alias": "terazi",
+    "name": "libra_arviis"
+  },
+  {
+    "alias": "akrep",
+    "name": "scorpio_arviis"
+  },
+  {
+    "alias": "yay",
+    "name": "sagittarius_arviis"
+  },
+  {
+    "alias": "oglak",
+    "name": "capricorn_arviis"
+  },
+  {
+    "alias": "kova",
+    "name": "aquarius_arviis"
+  },
+  {
+    "alias": "balik",
+    "name": "pisces_arviis"
+  },
+  {
+    "alias": "motto",
+    "name": "motto_arviis"
+  },
+  {
+    "alias": "element",
+    "name": "element_arviis"
+  },
+  {
+    "alias": "gezegen",
+    "name": "aura_arviis"
+  },
+  {
+    "alias": "UpVote",
+    "name": "upvote_arviis"
+  },
+  {
+    "alias": "DisVote",
+    "name": "disvote_arviis"
+  },
+  {
+    "alias": "speechbubble",
+    "name": "speechbubble_arviis"
+  },
+  {
+    "alias": "pin",
+    "name": "pin_arviis"
+  },
+  {
+    "alias": "redheart",
+    "name": "redheart_arviis"
+  },
+  {
+    "alias": "think",
+    "name": "think_arviis"
+  },
+  {
+    "alias": "anxious",
+    "name": "anxious_arviis"
+  },
+  {
+    "alias": "sob",
+    "name": "sob_arviis"
+  },
+  {
+    "alias": "swear",
+    "name": "swear_arviis"
+  },
+  {
+    "alias": "glitchwarning",
+    "name": "glitch_warning_arviis"
+  },
+  {
+    "alias": "networkerror",
+    "name": "network_error_arviis"
+  },
+  {
+    "alias": "catrainbowglitch",
+    "name": "cat_rainbow_glitch_arviis"
+  },
+  {
+    "alias": "gummydragonmicrophone",
+    "name": "gummy_dragon_microphone_arviis"
+  },
+  {
+    "alias": "log",
+    "name": "log_arviis"
+  },
+  {
+    "alias": "moderatoraccept",
+    "name": "moderator_accept_arviis"
+  },
+  {
+    "alias": "sadpickle",
+    "name": "sad_pickle_arviis"
+  },
+  {
+    "alias": "parlayanyildiz",
+    "name": "parlayanyildiz_arviis"
+  },
+  {
+    "alias": "colorized_voice_locked",
+    "name": "colorized_voice_locked_arviis"
+  },
+  {
+    "alias": "colorized_screenshare_max",
+    "name": "colorized_screenshare_max_arviis"
+  },
+  {
+    "alias": "colorized_volume_max",
+    "name": "screenshare_volume_max_arviis"
+  },
+  {
+    "alias": "delete_guild",
+    "name": "delete_guild_arviis"
+  },
+  {
+    "alias": "colorized_security_filter",
+    "name": "colorized_security_filter_arviis"
+  },
+  {
+    "alias": "discord_channel_from_VEGA",
+    "name": "discord_channel_from_VEGA_arviis"
+  },
+  {
+    "alias": "quarantine",
+    "name": "quarantine_arviis"
+  },
+  {
+    "alias": "suspected_spam_activ",
+    "name": "suspected_spam_activ_arviis"
+  },
+  {
+    "alias": "colorized_ping_connection",
+    "name": "colorized_ping_connection_arviis"
+  },
+  {
+    "alias": "online_web",
+    "name": "online_web_arviis"
+  },
+  {
+    "alias": "carpi_web",
+    "name": "carpi_web_arviis"
+  },
+  {
+    "alias": "crown",
+    "name": "crown_arviis"
+  },
+  {
+    "alias": "odul",
+    "name": "odul_arviis"
+  },
+  {
+    "alias": "elsallama",
+    "name": "elsallama_arviis"
+  },
+  {
+    "alias": "kapat",
+    "name": "kapat_arviis"
+  },
+  {
+    "alias": "uyari",
+    "name": "uyari_arviis"
+  },
+  {
+    "alias": "modernsagok",
+    "name": "modernsagok_arviis"
+  },
+  {
+    "alias": "arti",
+    "name": "arti_arviis"
+  },
+  {
+    "alias": "cop",
+    "name": "cop_arviis"
+  },
+  {
+    "alias": "tokustur",
+    "name": "tokustur_arviis"
+  },
+  {
+    "alias": "girisok",
+    "name": "girisok_arviis"
+  },
+  {
+    "alias": "earthquake",
+    "name": "earthquake_arviis"
+  },
+  {
+    "alias": "turkbayragi",
+    "name": "turkbayragi"
+  },
+  {
+    "alias": "sinir",
+    "name": "sinir_arviis"
+  },
+  {
+    "alias": "chart",
+    "name": "chart_increasing_avriis"
+  },
+  {
+    "alias": "istatistik",
+    "name": "istatistik_arviis"
+  },
+  {
+    "alias": "timeout",
+    "name": "timeout_arviis"
+  },
+  {
+    "alias": "cute_active",
+    "name": "cute_active_arviis"
+  },
+  {
+    "alias": "new_member",
+    "name": "new_member_arviis"
+  },
+  {
+    "alias": "attention_bear",
+    "name": "attention_bear_arviis"
+  },
+  {
+    "alias": "kalkan",
+    "name": "kalkan_arviis"
+  },
+  {
+    "alias": "nuke",
+    "name": "nuke_arviis"
+  },
+  {
+    "alias": "ucanpara",
+    "name": "ucanpara_arviis"
+  },
+  {
+    "alias": "para",
+    "name": "para_arviis"
+  },
+  {
+    "alias": "cikisOk",
+    "name": "cikisok_arviis"
+  },
+  {
+    "alias": "BarBaslangic",
+    "name": "bar_baslangic_arviis"
+  },
+  {
+    "alias": "BarOrta1",
+    "name": "bar_orta1_arviis"
+  },
+  {
+    "alias": "BarOrta2",
+    "name": "bar_orta2_arviis"
+  },
+  {
+    "alias": "BarSon",
+    "name": "bar_son_arviis"
+  },
+  {
+    "alias": "Takvim",
+    "name": "takvim_arviis"
+  },
+  {
+    "alias": "kategori",
+    "name": "kategori_arviis"
+  },
+  {
+    "alias": "ara",
+    "name": "ara_arviis"
+  },
+  {
+    "alias": "home",
+    "name": "home_arviis"
+  },
+  {
+    "alias": "green_heart",
+    "name": "GreenHeart_arviis"
+  },
+  {
+    "alias": "elmas",
+    "name": "elmas_arviis"
+  },
+  {
+    "alias": "glowingquestion",
+    "name": "glowingquestion_arviis"
+  },
+  {
+    "alias": "tasi",
+    "name": "tasi_arviis"
+  },
+  {
+    "alias": "donensaat",
+    "name": "donensaat_arviis"
+  },
+  {
+    "alias": "market",
+    "name": "market_arviis"
+  },
+  {
+    "alias": "türklirasi",
+    "name": "tl_arviis"
+  },
+  {
+    "alias": "active",
+    "name": "active_arviis"
+  },
+  {
+    "alias": "deactive",
+    "name": "deactive_arviis"
+  },
+  {
+    "alias": "system",
+    "name": "sistemler_arviis"
+  }
+]

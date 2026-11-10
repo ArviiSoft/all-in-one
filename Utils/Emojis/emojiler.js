@@ -1,25 +1,5 @@
-const EMOJI_NAME_ALIASES = Object.freeze({
-  fourdkalp: "4dkalp",
-  koc: "aries",
-  boga: "taurus",
-  ikizler: "gemini",
-  yengec: "cancer",
-  aslan: "leo",
-  basak: "virgo",
-  terazi: "libra",
-  akrep: "scorpio",
-  yay: "sagittarius",
-  oglak: "capricorn",
-  kova: "aquarius",
-  balik: "pisces",
-  gezegen: "aura",
-  colorized_volume_max: "screenshare_volume_max",
-  chart: "chart_increasing",
-  system: "sistemler",
-  bilgi: "info",
-  girissagok: "girisok",
-  cikissagok: "cikisok",
-});
+const { getEmojiLookupKeys } = require("./emojiNames");
+const { ensureDefaultApplicationEmojis } = require("./applicationEmojis");
 
 let emojisByLookupKey = new Map();
 let emojisById = new Map();
@@ -27,32 +7,10 @@ let ambiguousLookupKeys = [];
 let initialized = false;
 let loadedAt = null;
 let loadingPromise = null;
-
-function normalizeName(value) {
-  return String(value).trim().toLowerCase();
-}
-
-function getLookupKeys(value) {
-  const originalName = normalizeName(value);
-  if (!originalName) return [];
-
-  const withoutLegacyId = originalName.replace(/_(?:\d+)?$/, "");
-  const withoutBrandSuffix = withoutLegacyId.replace(/_(?:arviis|avriis)$/, "");
-  const keys = new Set([originalName, withoutLegacyId, withoutBrandSuffix]);
-
-  for (const key of [...keys]) {
-    keys.add(key.replaceAll("_", ""));
-  }
-
-  keys.delete("");
-  return [...keys];
-}
+let syncStats = { created: 0, existing: 0, failed: [] };
 
 function getEmoji(alias) {
-  const normalizedAlias = normalizeName(alias);
-  const emojiName = EMOJI_NAME_ALIASES[normalizedAlias] || normalizedAlias;
-
-  for (const key of getLookupKeys(emojiName)) {
+  for (const key of getEmojiLookupKeys(alias)) {
     const emoji = emojisByLookupKey.get(key);
     if (emoji) return emoji;
   }
@@ -83,6 +41,9 @@ function getStatus() {
     count: emojisById.size,
     lookupCount: emojisByLookupKey.size,
     ambiguousLookupKeys: [...ambiguousLookupKeys],
+    created: syncStats.created,
+    existing: syncStats.existing,
+    failed: [...syncStats.failed],
   };
 }
 
@@ -92,7 +53,7 @@ async function fetchApplicationEmojis(client) {
   }
 
   const fetched = await client.application.emojis.fetch();
-  await require("./musicEmojis").ensureMusicEmojis(client, fetched);
+  const nextSyncStats = await ensureDefaultApplicationEmojis(client, fetched);
   const nextByLookupKey = new Map();
   const nextById = new Map();
   const ambiguousKeys = new Set();
@@ -100,7 +61,7 @@ async function fetchApplicationEmojis(client) {
   for (const emoji of fetched.values()) {
     nextById.set(emoji.id, emoji);
 
-    for (const key of getLookupKeys(emoji.name)) {
+    for (const key of getEmojiLookupKeys(emoji.name)) {
       const existing = nextByLookupKey.get(key);
 
       if (existing && existing.id !== emoji.id) {
@@ -117,6 +78,7 @@ async function fetchApplicationEmojis(client) {
   ambiguousLookupKeys = [...ambiguousKeys].sort();
   initialized = true;
   loadedAt = new Date();
+  syncStats = nextSyncStats;
 
   return getStatus();
 }

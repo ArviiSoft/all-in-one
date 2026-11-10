@@ -93,7 +93,8 @@ async function startBot() {
     await musicExtractorsReady;
     const emojiStats = await emojiler.loadApplicationEmojis(client);
     console.log(
-        `✔️ [EMOJİ] ${emojiStats.count} Application Emoji çekildi, `
+        `✔️ [EMOJİ] ${emojiStats.count} Application Emoji hazır `
+        + `(${emojiStats.created} yeni, ${emojiStats.existing} mevcut, ${emojiStats.failed.length} yüklenemeyen), `
         + `${emojiStats.lookupCount} taşınabilir ad anahtarı oluşturuldu.`,
     );
     if (emojiStats.ambiguousLookupKeys.length > 0) {

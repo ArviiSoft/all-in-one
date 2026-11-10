@@ -204,9 +204,29 @@ Kullanılan kategori başlıkları:
 
 ---
 
+## [v1.9.16] - 11.11.2026
+
+### Eklendi
+
+- İlk kurulumda genel, müzik, hesap ve boost sistemlerine ait tüm uygulama emojilerini otomatik yükleyen ortak kurulum akışı eklendi. Genel emoji görselleri, müzik emojileri gibi Base64 olarak doğrudan koda gömüldü.
+- Açılışta yeni yüklenen, mevcut olan ve yüklenemeyen emojilerin sayıları artık konsolda gösteriliyor.
+
+### Değiştirildi
+
+- Her açılışta Discord uygulamasındaki mevcut emojiler kontrol edilir. Büyük/küçük harf, eski isim/ID ve adlar dikkate alınarak yalnızca eksikler yüklenir. Mevcut emojiler tekrar oluşturulmaz. Silinen veya önceki denemede yüklenemeyen emojiler sonraki açılışta tamamlanır.
+
+### Düzeltildi
+
+- Sıfır kurulumda yalnızca müzik emojilerinin yüklenmesi düzeltildi.
+- `/yardım` komutunun eksik emoji nedeniyle `input.emoji: null / CombinedPropertyError` hatası vermesi giderildi. Kategori ve sistem menüleri, artık özel emojiler yüklenemese bile standart emoji yedekleriyle açılabiliyor.
+- Eksik eski emoji adları tamamlandı. Kaynağı silinmiş iki emoji için eşdeğer görsel verileri eklendi, boyut sınırını aşan grafik GIF'i animasyonu korunarak uygun boyuta getirildi.
+
+---
+
 [v1.9.10]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.10
 [v1.9.11]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.11
 [v1.9.12]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.12
 [v1.9.13]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.13
 [v1.9.14]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.14
 [v1.9.15]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.15
+[v1.9.16]: https://github.com/ArviiSoft/all-in-one/releases/tag/v1.9.16

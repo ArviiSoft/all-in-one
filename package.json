@@ -1,6 +1,6 @@
 {
   "name": "all-in-one_by_arviis",
-  "version": "1.9.15",
+  "version": "1.9.16",
   "description": "all-in-one_by_arviis.",
   "license": "GPL-3.0-only",
   "author": "arviis.",
@@ -15,7 +15,7 @@
   "dependencies": {
     "@discord-player/extractor": "^7.2.0",
     "@discordjs/voice": "^0.19.2",
-    "@napi-rs/canvas": "^1.1.0",
+    "@napi-rs/canvas": "^1.0.13",
     "@snazzah/davey": "^0.2.0",
     "apify-client": "^2.12.4",
     "archiver": "^8.0.0",
@@ -30,9 +30,9 @@
     "dayjs": "^1.11.13",
     "discord-player": "^7.2.0",
     "discord-player-spotify": "1.1.9",
-    "discord.js": "^14.28.1",
+    "discord.js": "^14.27.0",
     "express": "^5.3.0",
-    "express-rate-limit": "^8.7.2",
+    "express-rate-limit": "^8.7.3",
     "express-session": "^1.19.0",
     "ffmpeg-static": "^5.3.0",
     "fs": "^0.0.1-security",
@@ -72,7 +72,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "eslint": "^10.13.0",
+    "eslint": "^10.14.0",
     "globals": "^17.14.0"
   }
 }
